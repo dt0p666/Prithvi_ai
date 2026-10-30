@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <!-- Antique Gold Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3E5AB" />
+      <stop offset="25%" stop-color="#D4AF37" />
+      <stop offset="50%" stop-color="#AA771C" />
+      <stop offset="75%" stop-color="#E6C875" />
+      <stop offset="100%" stop-color="#805A10" />
+    </linearGradient>
+
+    <!-- Deep Bronze Rim Gradient -->
+    <radialGradient id="bronzeRim" cx="50%" cy="50%" r="50%">
+      <stop offset="75%" stop-color="#1E1710" />
+      <stop offset="92%" stop-color="#3A2D1F" />
+      <stop offset="100%" stop-color="#D4AF37" />
+    </radialGradient>
+
+    <!-- Inner Earth Texture Glow -->
+    <radialGradient id="innerGlow" cx="45%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#38291A" />
+      <stop offset="60%" stop-color="#1A130C" />
+      <stop offset="100%" stop-color="#0E0A06" />
+    </radialGradient>
+  </defs>
+
+  <!-- Outer Ring with Antique Gold Stroke -->
+  <circle cx="50" cy="50" r="47" fill="url(#innerGlow)" stroke="url(#goldGrad)" stroke-width="1.8" />
+  
+  <!-- Subtle Inner Concentric Ring -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="#D4AF37" stroke-width="0.6" stroke-opacity="0.4" stroke-dasharray="2 3" />
+  
+  <!-- 4 Cardinal Star Points (Astrological / Geographic Compass) -->
+  <circle cx="50" cy="5.5" r="1.2" fill="#E6C875" />
+  <circle cx="50" cy="94.5" r="1.2" fill="#E6C875" />
+  <circle cx="5.5" cy="50" r="1.2" fill="#E6C875" />
+  <circle cx="94.5" cy="50" r="1.2" fill="#E6C875" />
+
+  <!-- Stylized Serif 'P' with Earth & Foliage Motif -->
+  <path d="M 36 26
+           L 54 26
+           C 66 26, 73 32, 73 42
+           C 73 52, 65 58, 54 58
+           L 44 58
+           L 44 74
+           L 36 74
+           Z
+           M 44 34
+           L 44 50
+           L 53 50
+           C 60 50, 64 47, 64 42
+           C 64 37, 60 34, 53 34
+           Z" 
+        fill="url(#goldGrad)" 
+        filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.6))" />
+
+  <!-- Subtle Equator / Latitude Arc across the P -->
+  <path d="M 28 50 Q 50 56 72 50" fill="none" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.4" />
+</svg>

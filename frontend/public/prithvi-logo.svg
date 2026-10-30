@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 80" width="100%" height="100%">
+  <defs>
+    <linearGradient id="logoGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F7E7B4" />
+      <stop offset="30%" stop-color="#D4AF37" />
+      <stop offset="70%" stop-color="#B28228" />
+      <stop offset="100%" stop-color="#E5C77A" />
+    </linearGradient>
+
+    <radialGradient id="logoInnerGlow" cx="45%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#38291A" />
+      <stop offset="70%" stop-color="#1A130C" />
+      <stop offset="100%" stop-color="#0E0A06" />
+    </radialGradient>
+  </defs>
+
+  <!-- Emblem on the left -->
+  <g transform="translate(10, 10)">
+    <circle cx="30" cy="30" r="28" fill="url(#logoInnerGlow)" stroke="url(#logoGold)" stroke-width="1.5" />
+    <circle cx="30" cy="30" r="24.5" fill="none" stroke="#D4AF37" stroke-width="0.5" stroke-dasharray="1.5 2" stroke-opacity="0.5" />
+    
+    <!-- Serif P -->
+    <path d="M 22 15 L 33 15 C 40 15, 44 19, 44 25 C 44 31, 39 35, 33 35 L 27 35 L 27 45 L 22 45 Z M 27 20 L 27 30 L 32 30 C 36 30, 39 28, 39 25 C 39 22, 36 20, 32 20 Z" 
+          fill="url(#logoGold)" />
+  </g>
+
+  <!-- Typography on the right -->
+  <g transform="translate(85, 0)">
+    <!-- Subtitle: Sanskrit + English -->
+    <text x="0" y="26" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="9" fill="#9E8A68" letter-spacing="3" font-weight="500">
+      पृथ्वी · EARTH
+    </text>
+
+    <!-- Main Wordmark -->
+    <text x="0" y="52" font-family="'Cinzel', 'Playfair Display', 'Times New Roman', serif" font-size="30" fill="url(#logoGold)" letter-spacing="6" font-weight="600">
+      PRITHVI
+    </text>
+
+    <!-- Descriptor -->
+    <text x="2" y="66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" fill="#7D705C" letter-spacing="2.8" font-weight="600">
+      URBAN HEAT &amp; CLIMATE INTELLIGENCE
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-dark: #0c0a07;
+  --bg-card: #15110c;
+  --gold-primary: #d4af37;
+  --gold-light: #f4ede2;
+  --gold-muted: #9e855c;
+  --border-subtle: #231b14;
+  --border-gold: #4a3826;
+  --forest-dark: #0f1d14;
+  --terracotta: #8a3c22;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-dark);
+  color: #e2d7c5;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
