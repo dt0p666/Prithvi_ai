@@ -32,3 +32,25 @@ body {
   min-height: 100vh;
   width: 100%;
 }
+
+/* Print Stylesheet */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+  }
+
+  nav, footer, button, .utilities-container, #hotspot-pill {
+    display: none !important;
+  }
+
+  h1, h2, h3, p {
+    color: #000000 !important;
+  }
+
+  div {
+    border-color: #cccccc !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}

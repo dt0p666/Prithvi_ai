@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
@@ -13,6 +13,18 @@ import { AboutPage } from './pages/About/AboutPage';
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isAtmospheric, setIsAtmospheric] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      if (totalScroll > 0) {
+        setScrollProgress((window.scrollY / totalScroll) * 100);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <Router>
@@ -24,6 +36,18 @@ export default function App() {
         flexDirection: 'column',
         position: 'relative'
       }}>
+        {/* Top Scroll Progress Indicator */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: `${scrollProgress}%`,
+          height: '2px',
+          background: 'linear-gradient(90deg, #aa771c, #d4af37, #f7e7b4)',
+          zIndex: 100,
+          transition: 'width 0.1s ease-out'
+        }} />
+
         {/* Skip to Content Accessibility Link */}
         <a
           href="#main-content"

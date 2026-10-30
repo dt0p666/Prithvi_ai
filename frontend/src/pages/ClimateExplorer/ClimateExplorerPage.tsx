@@ -11,35 +11,35 @@ export const ClimateExplorerPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'temp_desc' | 'temp_asc' | 'green_desc'>('temp_desc');
 
   useEffect(() => {
-    // Attempt fetching real observations from API; fall back to demo observations if backend pipeline is in progress
-    fetch('/api/observations?limit=50')
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set('limit', '100');
+    if (selectedLandCover !== 'ALL') {
+      params.set('land_cover', selectedLandCover);
+    }
+    if (searchQuery.trim()) {
+      params.set('search', searchQuery.trim());
+    }
+    params.set('sort_by', sortBy);
+
+    fetch(`/api/observations?${params.toString()}`)
       .then((res) => {
-        if (!res.ok) throw new Error('API pending');
+        if (!res.ok) throw new Error('API fetch error');
         return res.json();
       })
       .then((data) => {
         if (data && data.items) {
           setCities(data.items);
-          setSelectedCity(data.items[0]);
+          if (!selectedCity && data.items.length > 0) {
+            setSelectedCity(data.items[0]);
+          }
         }
       })
-      .catch(() => {
-        // High-fidelity fallback representing actual dataset structure
-        const demoCities: CityRecord[] = [
-          { 'City Name': 'City_1', Latitude: -22.58, Longitude: 71.34, 'Elevation (m)': 833, 'Temperature (°C)': 22.98, 'Land Cover': 'Water', 'Population Density (people/km²)': 2544, 'Energy Consumption (kWh)': 7160, 'Air Quality Index (AQI)': 158, 'Urban Greenness Ratio (%)': 50.45, 'Health Impact (Mortality Rate/100k)': 14.47, 'Wind Speed (km/h)': 15.54, 'Humidity (%)': 63.67, 'Annual Rainfall (mm)': 1799, 'GDP per Capita (USD)': 7228 },
-          { 'City Name': 'City_2', Latitude: 81.13, Longitude: 12.99, 'Elevation (m)': 2438, 'Temperature (°C)': 34.20, 'Land Cover': 'Urban', 'Population Density (people/km²)': 9240, 'Energy Consumption (kWh)': 42117, 'Air Quality Index (AQI)': 174, 'Urban Greenness Ratio (%)': 11.20, 'Health Impact (Mortality Rate/100k)': 38.50, 'Wind Speed (km/h)': 5.20, 'Humidity (%)': 42.10, 'Annual Rainfall (mm)': 850, 'GDP per Capita (USD)': 28400 },
-          { 'City Name': 'City_3', Latitude: 41.76, Longitude: -68.57, 'Elevation (m)': 3928, 'Temperature (°C)': 10.64, 'Land Cover': 'Green Space', 'Population Density (people/km²)': 1016, 'Energy Consumption (kWh)': 4875, 'Air Quality Index (AQI)': 32, 'Urban Greenness Ratio (%)': 58.13, 'Health Impact (Mortality Rate/100k)': 8.20, 'Wind Speed (km/h)': 18.50, 'Humidity (%)': 66.67, 'Annual Rainfall (mm)': 2156, 'GDP per Capita (USD)': 18882 },
-          { 'City Name': 'City_4', Latitude: 12.97, Longitude: 77.59, 'Elevation (m)': 920, 'Temperature (°C)': 31.85, 'Land Cover': 'Industrial', 'Population Density (people/km²)': 8450, 'Energy Consumption (kWh)': 39500, 'Air Quality Index (AQI)': 182, 'Urban Greenness Ratio (%)': 14.80, 'Health Impact (Mortality Rate/100k)': 41.20, 'Wind Speed (km/h)': 8.40, 'Humidity (%)': 55.30, 'Annual Rainfall (mm)': 970, 'GDP per Capita (USD)': 14200 },
-          { 'City Name': 'City_5', Latitude: 28.61, Longitude: 77.20, 'Elevation (m)': 216, 'Temperature (°C)': 35.10, 'Land Cover': 'Urban', 'Population Density (people/km²)': 9890, 'Energy Consumption (kWh)': 46200, 'Air Quality Index (AQI)': 195, 'Urban Greenness Ratio (%)': 8.40, 'Health Impact (Mortality Rate/100k)': 47.90, 'Wind Speed (km/h)': 4.10, 'Humidity (%)': 38.50, 'Annual Rainfall (mm)': 680, 'GDP per Capita (USD)': 19800 },
-          { 'City Name': 'City_6', Latitude: -33.86, Longitude: 151.20, 'Elevation (m)': 58, 'Temperature (°C)': 24.30, 'Land Cover': 'Water', 'Population Density (people/km²)': 4120, 'Energy Consumption (kWh)': 18400, 'Air Quality Index (AQI)': 65, 'Urban Greenness Ratio (%)': 39.50, 'Health Impact (Mortality Rate/100k)': 15.30, 'Wind Speed (km/h)': 21.00, 'Humidity (%)': 71.20, 'Annual Rainfall (mm)': 1220, 'GDP per Capita (USD)': 42100 },
-          { 'City Name': 'City_7', Latitude: 35.67, Longitude: 139.65, 'Elevation (m)': 44, 'Temperature (°C)': 28.70, 'Land Cover': 'Urban', 'Population Density (people/km²)': 8900, 'Energy Consumption (kWh)': 38000, 'Air Quality Index (AQI)': 110, 'Urban Greenness Ratio (%)': 21.40, 'Health Impact (Mortality Rate/100k)': 24.10, 'Wind Speed (km/h)': 11.20, 'Humidity (%)': 58.00, 'Annual Rainfall (mm)': 1530, 'GDP per Capita (USD)': 39500 },
-          { 'City Name': 'City_8', Latitude: 52.52, Longitude: 13.40, 'Elevation (m)': 34, 'Temperature (°C)': 19.50, 'Land Cover': 'Green Space', 'Population Density (people/km²)': 3800, 'Energy Consumption (kWh)': 15200, 'Air Quality Index (AQI)': 48, 'Urban Greenness Ratio (%)': 46.20, 'Health Impact (Mortality Rate/100k)': 12.00, 'Wind Speed (km/h)': 14.80, 'Humidity (%)': 64.00, 'Annual Rainfall (mm)': 570, 'GDP per Capita (USD)': 45000 },
-        ];
-        setCities(demoCities);
-        setSelectedCity(demoCities[0]);
+      .catch((err) => {
+        console.warn('Using local observations fallback:', err);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedLandCover, searchQuery, sortBy]);
 
   const filtered = cities
     .filter((c) => {
