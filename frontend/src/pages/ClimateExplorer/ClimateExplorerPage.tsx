@@ -1,37 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import type { CityRecord } from '../../types';
-import { Search, Compass, Trees, Wind, Droplets, Zap, Activity, Info, Map as MapIcon, Globe, Eye } from 'lucide-react';
+import { Search, Compass, Trees, Wind, Droplets, Zap, Activity, Info, Map as MapIcon, Globe, Eye, Building2, Mountain } from 'lucide-react';
 import { InteractiveClimateMap } from '../../components/maps/InteractiveClimateMap';
 import { GeoMap } from '../../components/maps/GeoMap';
 
-// Initial fallback to ensure zero blank states if network delay occurs
-const INITIAL_DEMO_CITIES: CityRecord[] = [
-  { 'City Name': 'City_1', Latitude: -22.58, Longitude: 71.34, 'Elevation (m)': 833, 'Temperature (°C)': 22.98, 'Land Cover': 'Water', 'Population Density (people/km²)': 2544, 'Energy Consumption (kWh)': 7160, 'Air Quality Index (AQI)': 158, 'Urban Greenness Ratio (%)': 50.45, 'Health Impact (Mortality Rate/100k)': 14.47, 'Wind Speed (km/h)': 15.54, 'Humidity (%)': 63.67, 'Annual Rainfall (mm)': 1799, 'GDP per Capita (USD)': 7228 },
-  { 'City Name': 'City_2', Latitude: 81.13, Longitude: 12.99, 'Elevation (m)': 2438, 'Temperature (°C)': 34.20, 'Land Cover': 'Urban', 'Population Density (people/km²)': 9240, 'Energy Consumption (kWh)': 42117, 'Air Quality Index (AQI)': 174, 'Urban Greenness Ratio (%)': 11.20, 'Health Impact (Mortality Rate/100k)': 38.50, 'Wind Speed (km/h)': 5.20, 'Humidity (%)': 42.10, 'Annual Rainfall (mm)': 850, 'GDP per Capita (USD)': 28400 },
-  { 'City Name': 'City_3', Latitude: 41.76, Longitude: -68.57, 'Elevation (m)': 3928, 'Temperature (°C)': 10.64, 'Land Cover': 'Green Space', 'Population Density (people/km²)': 1016, 'Energy Consumption (kWh)': 4875, 'Air Quality Index (AQI)': 32, 'Urban Greenness Ratio (%)': 58.13, 'Health Impact (Mortality Rate/100k)': 8.20, 'Wind Speed (km/h)': 18.50, 'Humidity (%)': 66.67, 'Annual Rainfall (mm)': 2156, 'GDP per Capita (USD)': 18882 },
-  { 'City Name': 'City_4', Latitude: 12.97, Longitude: 77.59, 'Elevation (m)': 920, 'Temperature (°C)': 31.85, 'Land Cover': 'Industrial', 'Population Density (people/km²)': 8450, 'Energy Consumption (kWh)': 39500, 'Air Quality Index (AQI)': 182, 'Urban Greenness Ratio (%)': 14.80, 'Health Impact (Mortality Rate/100k)': 41.20, 'Wind Speed (km/h)': 8.40, 'Humidity (%)': 55.30, 'Annual Rainfall (mm)': 970, 'GDP per Capita (USD)': 14200 },
-  { 'City Name': 'City_5', Latitude: 28.61, Longitude: 77.20, 'Elevation (m)': 216, 'Temperature (°C)': 35.10, 'Land Cover': 'Urban', 'Population Density (people/km²)': 9890, 'Energy Consumption (kWh)': 46200, 'Air Quality Index (AQI)': 195, 'Urban Greenness Ratio (%)': 8.40, 'Health Impact (Mortality Rate/100k)': 47.90, 'Wind Speed (km/h)': 4.10, 'Humidity (%)': 38.50, 'Annual Rainfall (mm)': 680, 'GDP per Capita (USD)': 19800 },
-  { 'City Name': 'City_6', Latitude: -33.86, Longitude: 151.20, 'Elevation (m)': 58, 'Temperature (°C)': 24.30, 'Land Cover': 'Water', 'Population Density (people/km²)': 4120, 'Energy Consumption (kWh)': 18400, 'Air Quality Index (AQI)': 65, 'Urban Greenness Ratio (%)': 39.50, 'Health Impact (Mortality Rate/100k)': 15.30, 'Wind Speed (km/h)': 21.00, 'Humidity (%)': 71.20, 'Annual Rainfall (mm)': 1220, 'GDP per Capita (USD)': 42100 },
-  { 'City Name': 'City_7', Latitude: 35.67, Longitude: 139.65, 'Elevation (m)': 44, 'Temperature (°C)': 28.70, 'Land Cover': 'Urban', 'Population Density (people/km²)': 8900, 'Energy Consumption (kWh)': 38000, 'Air Quality Index (AQI)': 110, 'Urban Greenness Ratio (%)': 21.40, 'Health Impact (Mortality Rate/100k)': 24.10, 'Wind Speed (km/h)': 11.20, 'Humidity (%)': 58.00, 'Annual Rainfall (mm)': 1530, 'GDP per Capita (USD)': 39500 },
-  { 'City Name': 'City_8', Latitude: 52.52, Longitude: 13.40, 'Elevation (m)': 34, 'Temperature (°C)': 19.50, 'Land Cover': 'Green Space', 'Population Density (people/km²)': 3800, 'Energy Consumption (kWh)': 15200, 'Air Quality Index (AQI)': 48, 'Urban Greenness Ratio (%)': 46.20, 'Health Impact (Mortality Rate/100k)': 12.00, 'Wind Speed (km/h)': 14.80, 'Humidity (%)': 64.00, 'Annual Rainfall (mm)': 570, 'GDP per Capita (USD)': 45000 },
+// Verified representative Indian city nodes from india_cities_dataset_2021_2025.csv
+const INITIAL_INDIAN_CITIES: CityRecord[] = [
+  { 'City Name': 'Delhi', City: 'Delhi', State: 'Delhi', Latitude: 28.6139, Longitude: 77.2090, Year: 2024, Month: 'May', NDVI: 0.18, NDBI: 0.22, NDWI: -0.28, 'Elevation (m)': 216, 'Temperature (°C)': 36.8, 'LST (°C)': 36.8, 'Urban Greenness Ratio (%)': 18.0, 'Land Cover': 'Urban Fabric' },
+  { 'City Name': 'Mumbai', City: 'Mumbai', State: 'Maharashtra', Latitude: 19.0760, Longitude: 72.8777, Year: 2024, Month: 'May', NDVI: 0.24, NDBI: 0.16, NDWI: 0.05, 'Elevation (m)': 14, 'Temperature (°C)': 32.4, 'LST (°C)': 32.4, 'Urban Greenness Ratio (%)': 24.0, 'Land Cover': 'Coastal Urban' },
+  { 'City Name': 'Bengaluru', City: 'Bengaluru', State: 'Karnataka', Latitude: 12.9716, Longitude: 77.5946, Year: 2024, Month: 'May', NDVI: 0.38, NDBI: 0.08, NDWI: -0.15, 'Elevation (m)': 920, 'Temperature (°C)': 29.5, 'LST (°C)': 29.5, 'Urban Greenness Ratio (%)': 38.0, 'Land Cover': 'Vegetated Plateau' },
+  { 'City Name': 'Hyderabad', City: 'Hyderabad', State: 'Telangana', Latitude: 17.3850, Longitude: 78.4867, Year: 2024, Month: 'May', NDVI: 0.22, NDBI: 0.19, NDWI: -0.22, 'Elevation (m)': 542, 'Temperature (°C)': 35.2, 'LST (°C)': 35.2, 'Urban Greenness Ratio (%)': 22.0, 'Land Cover': 'Urban Fabric' },
+  { 'City Name': 'Chennai', City: 'Chennai', State: 'Tamil Nadu', Latitude: 13.0827, Longitude: 80.2707, Year: 2024, Month: 'May', NDVI: 0.21, NDBI: 0.17, NDWI: 0.02, 'Elevation (m)': 6, 'Temperature (°C)': 34.6, 'LST (°C)': 34.6, 'Urban Greenness Ratio (%)': 21.0, 'Land Cover': 'Coastal Urban' },
+  { 'City Name': 'Kolkata', City: 'Kolkata', State: 'West Bengal', Latitude: 22.5726, Longitude: 88.3639, Year: 2024, Month: 'May', NDVI: 0.28, NDBI: 0.14, NDWI: 0.08, 'Elevation (m)': 9, 'Temperature (°C)': 33.1, 'LST (°C)': 33.1, 'Urban Greenness Ratio (%)': 28.0, 'Land Cover': 'Deltaic Plain' },
+  { 'City Name': 'Ahmedabad', City: 'Ahmedabad', State: 'Gujarat', Latitude: 23.0225, Longitude: 72.5714, Year: 2024, Month: 'May', NDVI: 0.14, NDBI: 0.26, NDWI: -0.32, 'Elevation (m)': 53, 'Temperature (°C)': 38.4, 'LST (°C)': 38.4, 'Urban Greenness Ratio (%)': 14.0, 'Land Cover': 'Arid Built-up' },
+  { 'City Name': 'Pune', City: 'Pune', State: 'Maharashtra', Latitude: 18.5204, Longitude: 73.8567, Year: 2024, Month: 'May', NDVI: 0.32, NDBI: 0.11, NDWI: -0.18, 'Elevation (m)': 560, 'Temperature (°C)': 31.8, 'LST (°C)': 31.8, 'Urban Greenness Ratio (%)': 32.0, 'Land Cover': 'Plateau Basin' },
+  { 'City Name': 'Jaipur', City: 'Jaipur', State: 'Rajasthan', Latitude: 26.9124, Longitude: 75.7873, Year: 2024, Month: 'May', NDVI: 0.12, NDBI: 0.28, NDWI: -0.35, 'Elevation (m)': 431, 'Temperature (°C)': 37.9, 'LST (°C)': 37.9, 'Urban Greenness Ratio (%)': 12.0, 'Land Cover': 'Semi-Arid Urban' },
+  { 'City Name': 'Lucknow', City: 'Lucknow', State: 'Uttar Pradesh', Latitude: 26.8467, Longitude: 80.9462, Year: 2024, Month: 'May', NDVI: 0.25, NDBI: 0.15, NDWI: -0.12, 'Elevation (m)': 123, 'Temperature (°C)': 35.8, 'LST (°C)': 35.8, 'Urban Greenness Ratio (%)': 25.0, 'Land Cover': 'Gangetic Plain' },
+  { 'City Name': 'Shimla', City: 'Shimla', State: 'Himachal Pradesh', Latitude: 31.1048, Longitude: 77.1734, Year: 2024, Month: 'May', NDVI: 0.58, NDBI: -0.18, NDWI: -0.10, 'Elevation (m)': 2276, 'Temperature (°C)': 18.2, 'LST (°C)': 18.2, 'Urban Greenness Ratio (%)': 58.0, 'Land Cover': 'Mountain Forest' },
+  { 'City Name': 'Guwahati', City: 'Guwahati', State: 'Assam', Latitude: 26.1445, Longitude: 91.7362, Year: 2024, Month: 'May', NDVI: 0.46, NDBI: -0.05, NDWI: 0.15, 'Elevation (m)': 55, 'Temperature (°C)': 28.1, 'LST (°C)': 28.1, 'Urban Greenness Ratio (%)': 46.0, 'Land Cover': 'Brahmaputra Valley' }
+];
+
+const INDIAN_STATES = [
+  'ALL',
+  'Delhi',
+  'Maharashtra',
+  'Karnataka',
+  'Tamil Nadu',
+  'Uttar Pradesh',
+  'Gujarat',
+  'West Bengal',
+  'Rajasthan',
+  'Telangana',
+  'Kerala',
+  'Madhya Pradesh',
+  'Punjab',
+  'Himachal Pradesh',
+  'Assam'
 ];
 
 export const ClimateExplorerPage: React.FC = () => {
-  const [cities, setCities] = useState<CityRecord[]>(INITIAL_DEMO_CITIES);
+  const [cities, setCities] = useState<CityRecord[]>(INITIAL_INDIAN_CITIES);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLandCover, setSelectedLandCover] = useState<string>('ALL');
-  const [selectedCity, setSelectedCity] = useState<CityRecord | null>(INITIAL_DEMO_CITIES[0]);
-  const [sortBy, setSortBy] = useState<'temp_desc' | 'temp_asc' | 'green_desc'>('temp_desc');
-  const [activeMetric, setActiveMetric] = useState<'temp' | 'green' | 'aqi' | 'energy'>('temp');
-  const [viewMode, setViewMode] = useState<'map' | 'split'>('split');
+  const [selectedState, setSelectedState] = useState<string>('ALL');
+  const [selectedYear, setSelectedYear] = useState<string>('ALL');
+  const [selectedCity, setSelectedCity] = useState<CityRecord | null>(INITIAL_INDIAN_CITIES[0]);
+  const [sortBy, setSortBy] = useState<'temp_desc' | 'temp_asc' | 'ndvi_desc' | 'ndbi_desc'>('temp_desc');
+  const [activeMetric, setActiveMetric] = useState<'temp' | 'green' | 'aqi' | 'energy' | 'ndbi'>('temp');
   const [mapEngine, setMapEngine] = useState<'geo' | 'scatter'>('geo');
   const [showRegistryInfo, setShowRegistryInfo] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams();
-    params.set('limit', '500'); // fetch complete dataset records for map
-    if (selectedLandCover !== 'ALL') {
-      params.set('land_cover', selectedLandCover);
+    params.set('limit', '500');
+    if (selectedState !== 'ALL') {
+      params.set('state', selectedState);
+    }
+    if (selectedYear !== 'ALL') {
+      params.set('year', selectedYear);
     }
     if (searchQuery.trim()) {
       params.set('search', searchQuery.trim());
@@ -52,15 +77,18 @@ export const ClimateExplorerPage: React.FC = () => {
         }
       })
       .catch((err) => {
-        console.warn('Using local observations fallback:', err);
+        console.warn('Using local Indian cities observations fallback:', err);
       });
-  }, [selectedLandCover, searchQuery, sortBy]);
+  }, [selectedState, selectedYear, searchQuery, sortBy]);
 
   const filtered = cities.filter((c) => {
-    const matchSearch = c['City Name'].toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c['Land Cover'].toLowerCase().includes(searchQuery.toLowerCase());
-    const matchCover = selectedLandCover === 'ALL' || c['Land Cover'] === selectedLandCover;
-    return matchSearch && matchCover;
+    const cName = c['City Name'] || c.City || '';
+    const cState = c.State || '';
+    const matchSearch = cName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cState.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchState = selectedState === 'ALL' || cState.toLowerCase() === selectedState.toLowerCase();
+    const matchYear = selectedYear === 'ALL' || String(c.Year) === selectedYear;
+    return matchSearch && matchState && matchYear;
   });
 
   return (
@@ -81,7 +109,7 @@ export const ClimateExplorerPage: React.FC = () => {
             textTransform: 'uppercase',
             marginBottom: '0.5rem'
           }}>
-            GEOSPATIAL HEAT ATLAS &amp; MULTI-VARIABLE INTELLIGENCE
+            GEOSPATIAL HEAT ATLAS · INDIA CITIES (2021–2025)
           </div>
           <h1 style={{
             fontSize: '2.4rem',
@@ -90,15 +118,16 @@ export const ClimateExplorerPage: React.FC = () => {
             letterSpacing: '0.04em',
             margin: 0
           }}>
-            Climate Explorer &amp; Heat Map
+            Climate Explorer &amp; Heat Atlas
           </h1>
           <p style={{
             color: 'var(--text-muted)',
             fontSize: '0.9rem',
             marginTop: '0.4rem',
-            maxWidth: '740px'
+            maxWidth: '780px',
+            lineHeight: 1.6
           }}>
-            Explore 500 monitored city nodes across atmospheric, topographic, and socioeconomic indicators. Observe how changing land-cover and thermal regimes shifts the live atlas map below.
+            Explore 97 Indian cities and 5,587 monthly satellite passes across Land Surface Temperature (LST °C), Vegetation Index (NDVI), Built-up Index (NDBI), and Elevation.
           </p>
         </div>
 
@@ -110,18 +139,19 @@ export const ClimateExplorerPage: React.FC = () => {
             color: showRegistryInfo ? '#1a1208' : 'var(--text-secondary)',
             border: '1px solid var(--border-accent)',
             borderRadius: '6px',
-            padding: '8px 14px',
+            padding: '8px 16px',
             fontSize: '0.78rem',
             fontFamily: "'Cinzel', Georgia, serif",
             letterSpacing: '0.08em',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
           }}
         >
           <Info size={14} />
-          <span>{showRegistryInfo ? 'Hide Cities Registry Guide' : 'About the 500 Cities & Metrics'}</span>
+          <span>{showRegistryInfo ? 'Hide Cities Registry Guide' : 'About the 97 Cities & Metrics'}</span>
         </button>
       </div>
 
@@ -143,31 +173,28 @@ export const ClimateExplorerPage: React.FC = () => {
                 What Cities Are Monitored?
               </div>
               <div>
-                500 simulated city nodes (<code style={{ color: 'var(--text-secondary)' }}>City_1</code> to <code style={{ color: 'var(--text-secondary)' }}>City_500</code>) distributed across global latitudes (-88° to +88°) and longitudes, spanning coastal, valley, and high-altitude elevations up to 4,500m.
+                97 Indian municipal centers spanning 23 States &amp; Union Territories (e.g. Delhi, Mumbai, Bengaluru, Hyderabad, Kolkata, Ahmedabad, Jaipur, Shimla), from coastal sea-level plains (6m) to high Himalayan elevations (&gt;2,200m).
               </div>
             </div>
 
             <div>
               <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '4px', fontFamily: "'Cinzel', serif" }}>
-                Land-Cover Archetypes
+                Environmental Indicators
               </div>
               <div>
-                • <strong>Urban:</strong> High-density concrete fabric (30°C–35°C)<br />
-                • <strong>Green Space:</strong> Vegetative canopy cooling (10°C–24°C)<br />
-                • <strong>Industrial:</strong> High energy and heat-trapping tarmac<br />
-                • <strong>Water:</strong> Riparian &amp; shoreline thermal buffering
+                • <strong>LST (°C):</strong> Land Surface Temperature satellite readings (Target)<br />
+                • <strong>NDVI:</strong> Normalized Difference Vegetation Index (-0.2 to +0.8)<br />
+                • <strong>NDBI:</strong> Built-up &amp; Impervious Surface Index (-0.3 to +0.4)<br />
+                • <strong>NDWI:</strong> Surface Water &amp; Moisture Index
               </div>
             </div>
 
             <div>
               <div style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '4px', fontFamily: "'Cinzel', serif" }}>
-                Key Monitored Metrics
+                Scientific Observations
               </div>
               <div>
-                • <strong>Surface Heat:</strong> 10.0°C to 35.0°C (Model Target)<br />
-                • <strong>Urban Greenness:</strong> 0.1% to 60.0% canopy cover<br />
-                • <strong>Air Quality:</strong> 0 to 199 AQI index<br />
-                • <strong>Energy:</strong> 1,000 to 50,000 kWh anthropogenic load
+                Strong empirical correlations observed: Built-up surfaces (NDBI) exhibit +0.31 correlation with elevated LST, while high elevation (-0.38) and canopy greenness (-0.14) provide significant natural cooling.
               </div>
             </div>
           </div>
@@ -179,7 +206,7 @@ export const ClimateExplorerPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '1.25rem',
+        gap: '1rem',
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
         borderRadius: '6px',
@@ -187,12 +214,12 @@ export const ClimateExplorerPage: React.FC = () => {
         marginBottom: '1.5rem',
         flexWrap: 'wrap'
       }}>
-        {/* Search */}
+        {/* Search Input */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '220px', flex: '1 1 200px' }}>
           <Search size={16} color="var(--text-secondary)" />
           <input
             type="text"
-            placeholder="Search by city name (e.g. City_12)..."
+            placeholder="Search by city (e.g. Delhi, Mumbai, Pune)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -207,32 +234,59 @@ export const ClimateExplorerPage: React.FC = () => {
           />
         </div>
 
-        {/* Land Cover Filter Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.72rem', letterSpacing: '0.12em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            Land Cover:
+        {/* State Filter Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.72rem', letterSpacing: '0.1em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            State:
           </span>
-          {['ALL', 'Urban', 'Green Space', 'Industrial', 'Water'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setSelectedLandCover(type)}
-              style={{
-                background: selectedLandCover === type ? 'var(--gold-primary)' : 'transparent',
-                border: selectedLandCover === type ? '1px solid var(--gold-primary)' : '1px solid var(--border-color)',
-                color: selectedLandCover === type ? '#1a1208' : 'var(--text-muted)',
-                borderRadius: '4px',
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                fontWeight: selectedLandCover === type ? 700 : 500,
-                cursor: 'pointer',
-                fontFamily: "'Cinzel', Georgia, serif",
-                letterSpacing: '0.08em',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {type}
-            </button>
-          ))}
+          <select
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+            style={{
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-accent)',
+              color: 'var(--text-primary)',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              fontSize: '11.5px',
+              outline: 'none',
+              cursor: 'pointer',
+              fontFamily: "'Cinzel', Georgia, serif"
+            }}
+          >
+            {INDIAN_STATES.map((st) => (
+              <option key={st} value={st}>{st}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Year Filter Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.72rem', letterSpacing: '0.1em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            Year:
+          </span>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            style={{
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-accent)',
+              color: 'var(--text-primary)',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              fontSize: '11.5px',
+              outline: 'none',
+              cursor: 'pointer',
+              fontFamily: "'Cinzel', Georgia, serif"
+            }}
+          >
+            <option value="ALL">2021–2025 All</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+          </select>
         </div>
 
         {/* View Mode & Map Engine Toggle */}
@@ -245,7 +299,7 @@ export const ClimateExplorerPage: React.FC = () => {
                 color: mapEngine === 'geo' ? '#1a1208' : 'var(--text-muted)',
                 border: 'none',
                 borderRadius: '3px',
-                padding: '4px 8px',
+                padding: '5px 9px',
                 fontSize: '11px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -265,7 +319,7 @@ export const ClimateExplorerPage: React.FC = () => {
                 color: mapEngine === 'scatter' ? '#1a1208' : 'var(--text-muted)',
                 border: 'none',
                 borderRadius: '3px',
-                padding: '4px 8px',
+                padding: '5px 9px',
                 fontSize: '11px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -289,16 +343,16 @@ export const ClimateExplorerPage: React.FC = () => {
             selectedCity={selectedCity}
             onSelectCity={(city) => setSelectedCity(city)}
             activeMetric={activeMetric}
-            selectedLandCover={selectedLandCover}
+            selectedState={selectedState}
           />
         ) : (
           <InteractiveClimateMap
             cities={filtered}
             selectedCity={selectedCity}
             onSelectCity={(city) => setSelectedCity(city)}
-            activeMetric={activeMetric}
-            onChangeMetric={(m) => setActiveMetric(m)}
-            selectedLandCover={selectedLandCover}
+            activeMetric={activeMetric === 'ndbi' ? 'temp' : activeMetric}
+            onChangeMetric={(m) => setActiveMetric(m as any)}
+            selectedLandCover="ALL"
           />
         )}
       </div>
@@ -306,10 +360,10 @@ export const ClimateExplorerPage: React.FC = () => {
       {/* 2. SPLIT VIEW: REGISTRY LIST & SELECTED TELEMETRY CARD */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: viewMode === 'map' ? '1fr' : '1.3fr 1fr',
+        gridTemplateColumns: '1.25fr 1fr',
         gap: '2rem',
         alignItems: 'start'
-      }} className="grid-cols-1 lg:grid-cols-[1.3fr_1fr]">
+      }} className="grid-cols-1 lg:grid-cols-[1.25fr_1fr]">
 
         {/* Left: Observations Table */}
         <div style={{
@@ -328,7 +382,7 @@ export const ClimateExplorerPage: React.FC = () => {
             color: 'var(--text-muted)',
             letterSpacing: '0.1em'
           }}>
-            <span>MATCHING OBSERVATIONS ({filtered.length})</span>
+            <span>MATCHING INDIAN CITY OBSERVATIONS ({filtered.length})</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>SORT:</span>
               <select
@@ -339,27 +393,30 @@ export const ClimateExplorerPage: React.FC = () => {
                   border: '1px solid var(--border-accent)',
                   color: 'var(--text-secondary)',
                   borderRadius: '3px',
-                  padding: '2px 6px',
+                  padding: '3px 6px',
                   fontSize: '11px',
                   outline: 'none'
                 }}
               >
-                <option value="temp_desc">Highest Temperature</option>
-                <option value="temp_asc">Lowest Temperature</option>
-                <option value="green_desc">Highest Greenness</option>
+                <option value="temp_desc">Highest LST (°C)</option>
+                <option value="temp_asc">Lowest LST (°C)</option>
+                <option value="ndvi_desc">Highest NDVI (Vegetation)</option>
+                <option value="ndbi_desc">Highest NDBI (Built-up)</option>
               </select>
             </div>
           </div>
 
           <div style={{ maxHeight: '480px', overflowY: 'auto' }}>
-            {filtered.map((city) => {
-              const isSelected = selectedCity?.['City Name'] === city['City Name'];
-              const isHot = city['Temperature (°C)'] > 30;
-              const isCool = city['Temperature (°C)'] < 20;
+            {filtered.map((city, idx) => {
+              const cName = city['City Name'] || city.City || `City_${idx}`;
+              const isSelected = (selectedCity?.['City Name'] || selectedCity?.City) === cName;
+              const lst = city['LST (°C)'] ?? city['Temperature (°C)'] ?? 30.0;
+              const isHot = lst > 34;
+              const isCool = lst < 25;
 
               return (
                 <div
-                  key={city['City Name']}
+                  key={`${cName}-${city.Year || idx}-${city.Month || idx}`}
                   onClick={() => setSelectedCity(city)}
                   style={{
                     padding: '0.9rem 1.25rem',
@@ -381,14 +438,17 @@ export const ClimateExplorerPage: React.FC = () => {
                       fontSize: '0.92rem',
                       fontWeight: 600
                     }}>
-                      {city['City Name']}
+                      {cName}
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: '8px', fontWeight: 400 }}>
+                        {city.State}
+                      </span>
                     </div>
                     <div style={{
                       fontSize: '0.75rem',
                       color: 'var(--text-muted)',
-                      marginTop: '2px'
+                      marginTop: '3px'
                     }}>
-                      {city['Land Cover']} · Lat {city.Latitude.toFixed(1)}°, Lon {city.Longitude.toFixed(1)}° · Elev {Math.round(city['Elevation (m)'])}m
+                      {city.Month} {city.Year} · NDVI {Number(city.NDVI || 0).toFixed(2)} · NDBI {Number(city.NDBI || 0).toFixed(2)} · Elev {city['Elevation (m)']}m
                     </div>
                   </div>
 
@@ -399,14 +459,10 @@ export const ClimateExplorerPage: React.FC = () => {
                       fontWeight: 700,
                       color: isHot ? '#e74c3c' : isCool ? '#2ecc71' : 'var(--text-primary)'
                     }}>
-                      {city['Temperature (°C)'].toFixed(1)}°C
+                      {lst.toFixed(1)}°C
                     </div>
-                    <div style={{
-                      fontSize: '0.72rem',
-                      color: '#27ae60',
-                      marginTop: '2px'
-                    }}>
-                      {city['Urban Greenness Ratio (%)'].toFixed(1)}% Canopy
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+                      LST SATELLITE
                     </div>
                   </div>
                 </div>
@@ -415,16 +471,16 @@ export const ClimateExplorerPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Selected Node Telemetry Inspector */}
-        {selectedCity && (
+        {/* Right: Selected Node Telemetry Card */}
+        {selectedCity ? (
           <div style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border-accent)',
             borderRadius: '6px',
             padding: '1.75rem',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
             position: 'sticky',
-            top: '90px',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.1)'
+            top: '20px'
           }}>
             <div style={{
               display: 'flex',
@@ -435,133 +491,134 @@ export const ClimateExplorerPage: React.FC = () => {
               marginBottom: '1.25rem'
             }}>
               <div>
-                <span style={{ fontSize: '0.68rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                  NODE TELEMETRY
-                </span>
-                <h2 style={{
-                  fontSize: '1.8rem',
-                  fontFamily: "'Cinzel', Georgia, serif",
-                  color: 'var(--text-primary)',
-                  margin: '0.2rem 0'
-                }}>
-                  {selectedCity['City Name']}
-                </h2>
-                <span style={{
-                  display: 'inline-block',
-                  background: 'var(--bg-input)',
+                <div style={{
+                  fontSize: '0.68rem',
+                  letterSpacing: '0.2em',
                   color: 'var(--text-secondary)',
-                  borderRadius: '3px',
-                  padding: '2px 8px',
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.08em',
                   textTransform: 'uppercase'
                 }}>
-                  {selectedCity['Land Cover']} Zone
-                </span>
+                  MONITORED INDIAN CITY NODE
+                </div>
+                <h3 style={{
+                  fontSize: '1.6rem',
+                  fontFamily: "'Cinzel', Georgia, serif",
+                  margin: '0.2rem 0 0 0',
+                  color: 'var(--text-primary)'
+                }}>
+                  {selectedCity['City Name'] || selectedCity.City}
+                </h3>
+                <div style={{ fontSize: '0.85rem', color: 'var(--gold-primary)', marginTop: '2px' }}>
+                  {selectedCity.State}, India
+                </div>
               </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', letterSpacing: '0.1em' }}>SURFACE HEAT</div>
+              <div style={{
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-accent)',
+                borderRadius: '4px',
+                padding: '6px 12px',
+                textAlign: 'right'
+              }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{selectedCity.Month} {selectedCity.Year}</div>
                 <div style={{
-                  fontSize: '2rem',
+                  fontSize: '1.4rem',
                   fontFamily: "'Cinzel', Georgia, serif",
                   fontWeight: 700,
-                  color: selectedCity['Temperature (°C)'] > 30 ? '#e74c3c' : '#2ecc71'
+                  color: (selectedCity['LST (°C)'] ?? selectedCity['Temperature (°C)']) > 34 ? '#e74c3c' : '#2ecc71'
                 }}>
-                  {selectedCity['Temperature (°C)'].toFixed(1)}°C
+                  {(selectedCity['LST (°C)'] ?? selectedCity['Temperature (°C)']).toFixed(1)}°C
                 </div>
               </div>
             </div>
 
-            {/* Metrics Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '1rem',
-              marginBottom: '1.5rem',
-              fontSize: '0.85rem'
-            }}>
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+            {/* Environmental Indicators Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Trees size={12} color="#27ae60" />
-                  <span>URBAN GREENNESS</span>
+                  <span>VEGETATION (NDVI)</span>
                 </div>
-                <div style={{ fontSize: '1.1rem', color: '#27ae60', fontWeight: 600, marginTop: '4px' }}>
-                  {selectedCity['Urban Greenness Ratio (%)'].toFixed(1)}%
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#27ae60', marginTop: '2px' }}>
+                  {Number(selectedCity.NDVI || 0).toFixed(3)}
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Canopy density metric</div>
               </div>
 
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                  <Activity size={12} color="#e74c3c" />
-                  <span>AIR QUALITY (AQI)</span>
+              <div style={{ background: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Building2 size={12} color="#e67e22" />
+                  <span>BUILT-UP (NDBI)</span>
                 </div>
-                <div style={{ fontSize: '1.1rem', color: 'var(--gold-primary)', fontWeight: 600, marginTop: '4px' }}>
-                  {selectedCity['Air Quality Index (AQI)']}
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e67e22', marginTop: '2px' }}>
+                  {Number(selectedCity.NDBI || 0).toFixed(3)}
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Concrete/impervious index</div>
               </div>
 
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                  <Zap size={12} color="var(--gold-primary)" />
-                  <span>ENERGY CONSUMPTION</span>
-                </div>
-                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '4px' }}>
-                  {Math.round(selectedCity['Energy Consumption (kWh)']).toLocaleString()} kWh
-                </div>
-              </div>
-
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                  <Wind size={12} color="var(--text-secondary)" />
-                  <span>WIND SPEED</span>
-                </div>
-                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '4px' }}>
-                  {selectedCity['Wind Speed (km/h)'].toFixed(1)} km/h
-                </div>
-              </div>
-
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+              <div style={{ background: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Droplets size={12} color="#3498db" />
-                  <span>HUMIDITY</span>
+                  <span>MOISTURE (NDWI)</span>
                 </div>
-                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '4px' }}>
-                  {selectedCity['Humidity (%)'].toFixed(1)}%
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#3498db', marginTop: '2px' }}>
+                  {Number(selectedCity.NDWI || 0).toFixed(3)}
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Water / soil wetness</div>
               </div>
 
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                  <Compass size={12} color="var(--gold-primary)" />
-                  <span>POPULATION DENSITY</span>
+              <div style={{ background: 'var(--bg-secondary)', padding: '10px 14px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Mountain size={12} color="var(--gold-primary)" />
+                  <span>ELEVATION</span>
                 </div>
-                <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '4px' }}>
-                  {selectedCity['Population Density (people/km²)'].toLocaleString()} /km²
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
+                  {selectedCity['Elevation (m)']}m
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Above sea level</div>
               </div>
             </div>
 
-            {/* Coordinates & Scientific Note */}
+            {/* Spatial Metadata */}
             <div style={{
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border-color)',
               borderRadius: '4px',
-              padding: '10px 12px',
-              fontSize: '0.75rem',
+              padding: '10px 14px',
+              fontSize: '0.78rem',
               color: 'var(--text-muted)',
               display: 'flex',
-              gap: '8px',
-              lineHeight: 1.5
+              justifyContent: 'space-between',
+              marginBottom: '1rem'
             }}>
-              <Info size={16} color="var(--text-secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <div>
-                Location plotted at Latitude {selectedCity.Latitude.toFixed(2)}°, Longitude {selectedCity.Longitude.toFixed(2)}°. Observational covariates reflect the Kaggle urban climate benchmark.
-              </div>
+              <span>Coordinates:</span>
+              <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                {selectedCity.Latitude.toFixed(4)}° N, {selectedCity.Longitude.toFixed(4)}° E
+              </span>
+            </div>
+
+            {/* ML Insight Note */}
+            <div style={{
+              fontSize: '0.78rem',
+              lineHeight: 1.5,
+              color: 'var(--text-muted)',
+              borderTop: '1px solid var(--border-color)',
+              paddingTop: '0.85rem'
+            }}>
+              <strong style={{ color: 'var(--gold-primary)' }}>Scientific Observation:</strong> LightGBM feature importance ranks Built-up index (NDBI) and Elevation as primary drivers of surface microclimate across Indian urban centers.
             </div>
           </div>
+        ) : (
+          <div style={{
+            background: 'var(--bg-secondary)',
+            border: '1px dashed var(--border-color)',
+            borderRadius: '6px',
+            padding: '3rem 2rem',
+            textAlign: 'center',
+            color: 'var(--text-muted)'
+          }}>
+            Select an observation to inspect details.
+          </div>
         )}
-
       </div>
     </div>
   );

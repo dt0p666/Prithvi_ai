@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import type { CityRecord } from '../../types';
-import { ZoomIn, ZoomOut, RotateCcw, Layers, Thermometer, Trees, Wind, Activity } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Thermometer, Trees, Activity, Building2 } from 'lucide-react';
 
 interface MapProps {
   cities: CityRecord[];
@@ -19,8 +19,9 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
   onChangeMetric,
   selectedLandCover
 }) => {
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  // Center initial view over Indian subcontinent
+  const [zoom, setZoom] = useState(2.2);
+  const [pan, setPan] = useState({ x: -220, y: 70 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoveredCity, setHoveredCity] = useState<CityRecord | null>(null);
@@ -28,9 +29,6 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Map coordinates projection: Equirectangular
-  // Lon: -180 to +180 -> x: 0 to 100%
-  // Lat: +90 to -90  -> y: 0 to 100%
   const projectCoords = (lat: number, lon: number) => {
     const x = ((lon + 180) / 360) * 1000;
     const y = ((90 - lat) / 180) * 500;
@@ -38,37 +36,37 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
   };
 
   const getMetricColor = (city: CityRecord) => {
+    const t = city['LST (°C)'] ?? city['Temperature (°C)'] ?? 30;
     if (activeMetric === 'temp') {
-      const t = city['Temperature (°C)'];
-      if (t >= 32) return '#e74c3c'; // Severe Heat
-      if (t >= 26) return '#e67e22'; // Moderate Warmth
-      if (t >= 18) return '#f1c40f'; // Mild
+      if (t >= 34) return '#e74c3c'; // Severe Heat
+      if (t >= 29) return '#f39c12'; // Moderate Warmth
+      if (t >= 24) return '#e6c875'; // Mild
       return '#2ecc71'; // Cool
     }
     if (activeMetric === 'green') {
-      const g = city['Urban Greenness Ratio (%)'];
-      if (g >= 40) return '#27ae60'; // High Canopy
+      const g = (city.NDVI ?? 0.25) * 100;
+      if (g >= 35) return '#27ae60'; // High Canopy
       if (g >= 20) return '#2ecc71'; // Moderate
       return '#d35400'; // Sparse
     }
     if (activeMetric === 'aqi') {
-      const aqi = city['Air Quality Index (AQI)'];
-      if (aqi >= 150) return '#c0392b';
-      if (aqi >= 100) return '#e67e22';
+      const ndbi = city.NDBI ?? 0.1;
+      if (ndbi >= 0.2) return '#c0392b';
+      if (ndbi >= 0.05) return '#e67e22';
       return '#27ae60';
     }
-    // Energy
-    return city['Energy Consumption (kWh)'] > 30000 ? '#e67e22' : '#3498db';
+    // Energy / Built-up
+    return (city.NDBI ?? 0) > 0.1 ? '#e67e22' : '#3498db';
   };
 
   const getMetricValue = (city: CityRecord) => {
-    if (activeMetric === 'temp') return `${city['Temperature (°C)'].toFixed(1)}°C`;
-    if (activeMetric === 'green') return `${city['Urban Greenness Ratio (%)'].toFixed(1)}% Green`;
-    if (activeMetric === 'aqi') return `AQI ${city['Air Quality Index (AQI)']}`;
-    return `${Math.round(city['Energy Consumption (kWh)']).toLocaleString()} kWh`;
+    const t = city['LST (°C)'] ?? city['Temperature (°C)'] ?? 30;
+    if (activeMetric === 'temp') return `LST ${t.toFixed(1)}°C`;
+    if (activeMetric === 'green') return `NDVI ${Number(city.NDVI || 0.25).toFixed(2)}`;
+    if (activeMetric === 'aqi') return `NDBI ${Number(city.NDBI || 0.1).toFixed(2)} (Built-up)`;
+    return `Elevation ${city['Elevation (m)']}m`;
   };
 
-  // Pan interaction
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
@@ -82,20 +80,6 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
 
   const handleMouseUp = () => setIsDragging(false);
 
-  // Simplified continent path outlines for environmental geography feel
-  const continents = [
-    // North America
-    "M 160 80 Q 220 70 260 120 Q 240 180 180 200 Q 150 160 160 80 Z",
-    // South America
-    "M 280 260 Q 340 280 320 380 Q 290 440 260 380 Q 250 300 280 260 Z",
-    // Eurasia & Africa
-    "M 460 70 Q 650 60 780 110 Q 720 220 580 200 Q 480 180 460 70 Z",
-    // Africa
-    "M 470 200 Q 560 210 560 310 Q 520 400 480 340 Q 450 250 470 200 Z",
-    // Australia
-    "M 740 320 Q 820 310 830 380 Q 760 410 740 320 Z"
-  ];
-
   return (
     <div style={{
       position: 'relative',
@@ -107,7 +91,7 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
       overflow: 'hidden',
       userSelect: 'none'
     }}>
-      {/* Top Map Layer Selector & Metric Toggles */}
+      {/* Top Map Metric Toggles */}
       <div style={{
         position: 'absolute',
         top: '14px',
@@ -116,7 +100,7 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
         alignItems: 'center',
         gap: '6px',
         zIndex: 20,
-        background: 'rgba(20, 15, 10, 0.85)',
+        background: 'rgba(20, 15, 10, 0.88)',
         backdropFilter: 'blur(8px)',
         border: '1px solid var(--border-accent)',
         borderRadius: '6px',
@@ -129,17 +113,17 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
             color: activeMetric === 'temp' ? '#1a1208' : 'var(--text-secondary)',
             border: 'none',
             borderRadius: '4px',
-            padding: '4px 10px',
+            padding: '5px 10px',
             fontSize: '11px',
             fontWeight: 600,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: '5px'
           }}
         >
           <Thermometer size={12} />
-          <span>Surface Heat</span>
+          <span>Surface LST (°C)</span>
         </button>
 
         <button
@@ -149,17 +133,17 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
             color: activeMetric === 'green' ? '#ffffff' : 'var(--text-secondary)',
             border: 'none',
             borderRadius: '4px',
-            padding: '4px 10px',
+            padding: '5px 10px',
             fontSize: '11px',
             fontWeight: 600,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: '5px'
           }}
         >
           <Trees size={12} />
-          <span>Canopy Greenness</span>
+          <span>Vegetation (NDVI)</span>
         </button>
 
         <button
@@ -169,17 +153,17 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
             color: activeMetric === 'aqi' ? '#ffffff' : 'var(--text-secondary)',
             border: 'none',
             borderRadius: '4px',
-            padding: '4px 10px',
+            padding: '5px 10px',
             fontSize: '11px',
             fontWeight: 600,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: '5px'
           }}
         >
-          <Activity size={12} />
-          <span>Air Quality</span>
+          <Building2 size={12} />
+          <span>Built-up (NDBI)</span>
         </button>
       </div>
 
@@ -194,7 +178,7 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
         zIndex: 20
       }}>
         <button
-          onClick={() => setZoom(z => Math.min(3.5, z + 0.35))}
+          onClick={() => setZoom(z => Math.min(4.5, z + 0.4))}
           title="Zoom In"
           style={{
             background: 'var(--bg-secondary)',
@@ -213,7 +197,7 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
         </button>
 
         <button
-          onClick={() => setZoom(z => Math.max(0.8, z - 0.35))}
+          onClick={() => setZoom(z => Math.max(0.8, z - 0.4))}
           title="Zoom Out"
           style={{
             background: 'var(--bg-secondary)',
@@ -232,8 +216,8 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
         </button>
 
         <button
-          onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-          title="Reset Camera"
+          onClick={() => { setZoom(2.2); setPan({ x: -220, y: 70 }); }}
+          title="Reset to India Subcontinent"
           style={{
             background: 'var(--bg-secondary)',
             border: '1px solid var(--border-accent)',
@@ -276,40 +260,36 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
           }}
         >
           <defs>
-            {/* Latitude Grid lines */}
-            <pattern id="grid" width="100" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 100 0 L 0 0 0 50" fill="none" stroke="rgba(212, 175, 55, 0.08)" strokeWidth="0.8" />
+            <pattern id="grid" width="50" height="25" patternUnits="userSpaceOnUse">
+              <path d="M 50 0 L 0 0 0 25" fill="none" stroke="rgba(212, 175, 55, 0.08)" strokeWidth="0.6" />
             </pattern>
           </defs>
 
           {/* Grid Background */}
           <rect width="1000" height="500" fill="url(#grid)" />
 
-          {/* Continent Archetype Silhouettes */}
-          {continents.map((path, i) => (
-            <path
-              key={i}
-              d={path}
-              fill="rgba(42, 33, 24, 0.45)"
-              stroke="rgba(212, 175, 55, 0.22)"
-              strokeWidth="0.8"
-            />
-          ))}
+          {/* South Asia / India Peninsula Silhouette Outline */}
+          <path
+            d="M 685 155 Q 700 135 730 140 Q 755 145 770 170 Q 770 210 740 255 Q 725 285 715 285 Q 700 250 685 200 Z"
+            fill="rgba(42, 33, 24, 0.55)"
+            stroke="rgba(212, 175, 55, 0.35)"
+            strokeWidth="1.2"
+          />
 
-          {/* Equator & Prime Meridian markers */}
-          <line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(212, 175, 55, 0.25)" strokeDasharray="3 3" strokeWidth="0.8" />
-          <line x1="500" y1="0" x2="500" y2="500" stroke="rgba(212, 175, 55, 0.25)" strokeDasharray="3 3" strokeWidth="0.8" />
+          {/* Latitude / Longitude lines */}
+          <line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(212, 175, 55, 0.2)" strokeDasharray="3 3" strokeWidth="0.8" />
+          <line x1="715" y1="0" x2="715" y2="500" stroke="rgba(212, 175, 55, 0.2)" strokeDasharray="3 3" strokeWidth="0.8" />
 
-          {/* City Nodes (Thermal Points) */}
-          {cities.map((city) => {
+          {/* City Nodes */}
+          {cities.map((city, idx) => {
             const { x, y } = projectCoords(city.Latitude, city.Longitude);
-            const isSelected = selectedCity?.['City Name'] === city['City Name'];
+            const cityName = city['City Name'] || city.City || `City_${idx}`;
+            const isSelected = (selectedCity?.['City Name'] || selectedCity?.City) === cityName;
             const color = getMetricColor(city);
-            const matchesCover = selectedLandCover === 'ALL' || city['Land Cover'] === selectedLandCover;
 
             return (
               <g
-                key={city['City Name']}
+                key={`${cityName}-${idx}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelectCity(city);
@@ -322,26 +302,26 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
                   }
                 }}
                 onMouseLeave={() => setHoveredCity(null)}
-                style={{ cursor: 'pointer', opacity: matchesCover ? 1 : 0.18, transition: 'opacity 0.2s ease' }}
+                style={{ cursor: 'pointer' }}
               >
-                {/* Glow ring for selected or hovered */}
-                {(isSelected || hoveredCity?.['City Name'] === city['City Name']) && (
+                {/* Glow ring */}
+                {(isSelected || hoveredCity?.City === city.City) && (
                   <circle
                     cx={x}
                     cy={y}
-                    r={isSelected ? 10 : 7}
+                    r={isSelected ? 9 : 6}
                     fill="none"
                     stroke={color}
-                    strokeWidth="1.5"
-                    strokeOpacity="0.8"
+                    strokeWidth="1.6"
+                    strokeOpacity="0.85"
                   />
                 )}
 
-                {/* Heat node point */}
+                {/* Node point */}
                 <circle
                   cx={x}
                   cy={y}
-                  r={isSelected ? 5 : matchesCover ? 3.5 : 2}
+                  r={isSelected ? 4.5 : 3}
                   fill={color}
                   stroke="#100c08"
                   strokeWidth="0.8"
@@ -369,10 +349,11 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
             backdropFilter: 'blur(6px)'
           }}>
             <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, color: 'var(--gold-primary)' }}>
-              {hoveredCity['City Name']}
+              {hoveredCity['City Name'] || hoveredCity.City}
+              {hoveredCity.State ? `, ${hoveredCity.State}` : ''}
             </div>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              {hoveredCity['Land Cover']} · Lat {hoveredCity.Latitude.toFixed(1)}°, Lon {hoveredCity.Longitude.toFixed(1)}°
+              Lat {hoveredCity.Latitude.toFixed(2)}°, Lon {hoveredCity.Longitude.toFixed(2)}° · {hoveredCity.Month} {hoveredCity.Year}
             </div>
             <div style={{ marginTop: '4px', fontWeight: 600, color: getMetricColor(hoveredCity) }}>
               {getMetricValue(hoveredCity)}
@@ -389,7 +370,7 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        background: 'rgba(16, 12, 8, 0.88)',
+        background: 'rgba(16, 12, 8, 0.9)',
         backdropFilter: 'blur(6px)',
         border: '1px solid var(--border-color)',
         borderRadius: '4px',
@@ -398,15 +379,15 @@ export const InteractiveClimateMap: React.FC<MapProps> = ({
         color: 'var(--text-muted)',
         zIndex: 10
       }}>
-        <span>Showing: {cities.length} Monitored Cities</span>
+        <span>India Cities ({cities.length} observations)</span>
         <span>•</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2ecc71' }} />
-          <span>Low</span>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f1c40f' }} />
+          <span>Cool (&lt;29°C)</span>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f39c12' }} />
           <span>Moderate</span>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#e74c3c' }} />
-          <span>Elevated</span>
+          <span>Elevated (&gt;34°C)</span>
         </div>
       </div>
     </div>

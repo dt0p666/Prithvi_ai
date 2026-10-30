@@ -1,83 +1,88 @@
 export interface CityRecord {
   'City Name': string;
+  City: string;
+  State: string;
   Latitude: number;
   Longitude: number;
+  Year: number;
+  Month: string;
+  NDVI: number;
+  NDBI: number;
+  NDWI: number;
   'Elevation (m)': number;
   'Temperature (°C)': number;
-  'Land Cover': 'Water' | 'Green Space' | 'Industrial' | 'Urban';
-  'Population Density (people/km²)': number;
-  'Energy Consumption (kWh)': number;
-  'Air Quality Index (AQI)': number;
+  'LST (°C)': number;
   'Urban Greenness Ratio (%)': number;
-  'Health Impact (Mortality Rate/100k)': number;
-  'Wind Speed (km/h)': number;
-  'Humidity (%)': number;
-  'Annual Rainfall (mm)': number;
-  'GDP per Capita (USD)': number;
+  'Land Cover': string;
+}
+
+export interface DatasetMetadata {
+  dataset_name: string;
+  coverage: string;
+  time_range: string;
+  cities_count: number;
+  states_count: number;
+  total_rows: number;
+  total_columns: number;
+  target_variable: string;
+  target_units: string;
+  columns: { name: string; type: string; units: string }[];
 }
 
 export interface DatasetSummary {
-  total_cities: number;
-  avg_temperature: number;
-  min_temperature: number;
-  max_temperature: number;
-  avg_greenness: number;
-  land_cover_distribution: Record<string, number>;
-  avg_aqi: number;
-  avg_population_density: number;
+  total_observations: number;
+  unique_cities: number;
+  target_variable: string;
+  mean_lst: number;
+  mean_ndvi: number;
+  mean_ndbi: number;
+  mean_ndwi: number;
+  state_distribution_top10: Record<string, number>;
+  year_distribution: Record<string, number>;
 }
 
-export interface PredictionRequest {
-  land_cover: 'Water' | 'Green Space' | 'Industrial' | 'Urban';
+export interface ModelPredictionRequest {
+  month: string;
+  state: string;
+  ndvi: number;
+  ndbi: number;
+  ndwi: number;
   elevation_m: number;
-  population_density: number;
-  energy_consumption_kwh: number;
-  aqi: number;
-  urban_greenness_ratio: number;
-  wind_speed_kmh: number;
-  humidity_pct: number;
-  annual_rainfall_mm: number;
-  gdp_per_capita: number;
   latitude?: number;
   longitude?: number;
+  year?: number;
 }
 
-export interface PredictionResponse {
+export interface ModelPredictionResponse {
+  predicted_lst_c: number;
   predicted_temperature_c: number;
   units: string;
   model_name: string;
   model_version: string;
   target: string;
-  is_simulation: boolean;
+  r2_score: number;
+  mae_c: number;
   feature_contributions?: Record<string, number>;
   caveats: string[];
 }
 
 export interface ModelMetrics {
-  model_name: string;
-  mae: number;
-  rmse: number;
-  r2: number;
-  best_model: boolean;
-  features_used: string[];
+  best_model: string;
+  target: string;
+  test_samples: number;
+  models: Record<string, { mae: number; rmse: number; r2: number }>;
   feature_importances: { feature: string; importance: number }[];
 }
 
 export interface ScenarioRunRequest {
-  baseline_city?: string;
-  custom_inputs?: PredictionRequest;
-  interventions: {
-    greenness_delta_pct?: number; // e.g. +15%
-    energy_reduction_pct?: number; // e.g. -20%
-    target_land_cover?: 'Water' | 'Green Space' | 'Industrial' | 'Urban';
-  };
+  baseline_inputs: ModelPredictionRequest;
+  scenario_inputs: ModelPredictionRequest;
 }
 
 export interface ScenarioRunResponse {
-  baseline_temperature_c: number;
-  intervention_temperature_c: number;
-  delta_temperature_c: number;
+  baseline_lst_c: number;
+  intervention_lst_c: number;
+  delta_lst_c: number;
   units: string;
-  confidence_interval: [number, number];
   caveats: string[];
 }

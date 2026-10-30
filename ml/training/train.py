@@ -16,44 +16,38 @@ import joblib
 
 def run_training():
     base_dir = Path(__file__).resolve().parent.parent.parent
-    csv_path = base_dir / "urban_heat_island_dataset.csv"
+    csv_path = base_dir / "india_cities_dataset_2021_2025.csv"
     artifacts_dir = base_dir / "ml" / "artifacts"
     artifacts_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Loading dataset from: {csv_path}")
     df = pd.read_csv(csv_path, encoding='utf-8')
 
-    # Target: Temperature (°C)
-    target_col = "Temperature (°C)"
+    # Detect Target: LST (°C)
+    target_col = [c for c in df.columns if 'LST' in c][0]
+    print(f"Target column: {target_col}")
+
     y = df[target_col].values
 
-    # Features:
-    # Categorical: Land Cover
-    # Numeric: Elevation (m), Population Density (people/km²), Energy Consumption (kWh),
-    #          Air Quality Index (AQI), Urban Greenness Ratio (%), Wind Speed (km/h),
-    #          Humidity (%), Annual Rainfall (mm), GDP per Capita (USD)
-    categorical_features = ["Land Cover"]
+    categorical_features = ["Month", "State"]
     numeric_features = [
+        "NDVI",
+        "NDBI",
+        "NDWI",
         "Elevation (m)",
-        "Population Density (people/km²)",
-        "Energy Consumption (kWh)",
-        "Air Quality Index (AQI)",
-        "Urban Greenness Ratio (%)",
-        "Wind Speed (km/h)",
-        "Humidity (%)",
-        "Annual Rainfall (mm)",
-        "GDP per Capita (USD)"
+        "Latitude",
+        "Longitude",
+        "Year"
     ]
 
     feature_cols = categorical_features + numeric_features
     X = df[feature_cols]
 
-    # Leakage-safe Train/Test Split (80/20 with random state 42)
+    # Leakage-safe 80/20 train/test split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, random_state=42
     )
 
-    # Preprocessing pipeline
     preprocessor = ColumnTransformer(
         transformers=[
             ("num", StandardScaler(), numeric_features),
@@ -61,12 +55,11 @@ def run_training():
         ]
     )
 
-    # Models to benchmark
     models = {
         "DummyBaseline": DummyRegressor(strategy="mean"),
         "RidgeRegression": Ridge(alpha=1.0),
-        "RandomForest": RandomForestRegressor(n_estimators=100, max_depth=8, random_state=42),
-        "LightGBM": lgb.LGBMRegressor(n_estimators=100, max_depth=6, learning_rate=0.05, random_state=42, verbose=-1)
+        "RandomForest": RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42, n_jobs=-1),
+        "LightGBM": lgb.LGBMRegressor(n_estimators=150, max_depth=8, learning_rate=0.08, random_state=42, verbose=-1)
     }
 
     results = {}
@@ -93,7 +86,7 @@ def run_training():
             "rmse": round(rmse, 4),
             "r2": round(r2, 4)
         }
-        print(f"[{name}] MAE: {mae:.4f} | RMSE: {rmse:.4f} | R²: {r2:.4f}")
+        print(f"[{name}] MAE: {mae:.4f} °C | RMSE: {rmse:.4f} °C | R²: {r2:.4f}")
 
         if rmse < best_rmse:
             best_rmse = rmse
@@ -102,11 +95,7 @@ def run_training():
 
     results[best_model_name]["best_model"] = True
 
-    # Feature Importance (extract from best model if available, or Ridge/RF)
-    feature_names = []
-    # Numeric features
-    feature_names.extend(numeric_features)
-    # One-hot encoded categorical features
+    # Feature Importances from best pipeline / RandomForest
     cat_encoder = best_pipeline.named_steps["preprocessor"].named_transformers_["cat"]
     cat_names = list(cat_encoder.get_feature_names_out(categorical_features))
     transformed_features = numeric_features + cat_names
@@ -120,12 +109,13 @@ def run_training():
         for name, imp in sorted(zip(transformed_features, rf_importances), key=lambda x: x[1], reverse=True)
     ]
 
-    # Save artifacts
+    # Save artifact
     model_save_path = artifacts_dir / "best_model.joblib"
     joblib.dump(best_pipeline, model_save_path)
-    print(f"Saved best model pipeline to: {model_save_path}")
+    print(f"Saved best model ({best_model_name}) to: {model_save_path}")
 
     metadata = {
+        "dataset_name": "India Cities Climate & Land Surface Temperature (2021-2025)",
         "target": target_col,
         "target_units": "°C",
         "dataset_rows": len(df),
@@ -138,8 +128,8 @@ def run_training():
         "all_transformed_features": transformed_features,
         "models_benchmarked": results,
         "best_model": best_model_name,
-        "feature_importances": feature_importance_list,
-        "timestamp": "2026-10-30T22:08:00Z"
+        "feature_importances": feature_importance_list[:15],
+        "timestamp": "2026-10-30T23:03:00Z"
     }
 
     metrics_path = artifacts_dir / "metrics.json"

@@ -1,81 +1,108 @@
-import React, { useState } from 'react';
-import { ArrowLeftRight, AlertCircle, TrendingDown, TrendingUp, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeftRight, TrendingDown, TrendingUp, Info, Building2, Trees, Droplets, Mountain } from 'lucide-react';
 
-interface Archetype {
-  id: string;
-  name: string;
-  category: string;
-  temp: number;
-  greenness: number;
-  aqi: number;
-  energy: number;
-  density: number;
-  health: number;
-  description: string;
+interface CityComparisonResult {
+  city_a: {
+    name: string;
+    state: string;
+    lst_c: number;
+    ndvi: number;
+    ndbi: number;
+    elevation_m: number;
+  };
+  city_b: {
+    name: string;
+    state: string;
+    lst_c: number;
+    ndvi: number;
+    ndbi: number;
+    elevation_m: number;
+  };
+  delta: {
+    lst_c: number;
+    ndvi: number;
+    ndbi: number;
+    elevation_m: number;
+  };
 }
 
-const ARCHETYPES: Record<string, Archetype> = {
-  urban_core: {
-    id: 'urban_core',
-    name: 'High-Density Concrete Core',
-    category: 'Urban Fabric',
-    temp: 34.6,
-    greenness: 9.8,
-    aqi: 178,
-    energy: 44200,
-    density: 9400,
-    health: 44.2,
-    description: 'Paved surfaces, minimal vegetative shade, intense anthropogenic heat release.'
-  },
-  industrial_belt: {
-    id: 'industrial_belt',
-    name: 'Heavy Industrial Belt',
-    category: 'Industrial',
-    temp: 32.8,
-    greenness: 13.5,
-    aqi: 192,
-    energy: 48500,
-    density: 6800,
-    health: 46.8,
-    description: 'High energy consumption, elevated particulates, severe heat-retaining tarmac.'
-  },
-  green_canopy: {
-    id: 'green_canopy',
-    name: 'Regenerative Forest Canopy',
-    category: 'Green Space',
-    temp: 21.2,
-    greenness: 54.8,
-    aqi: 38,
-    energy: 9800,
-    density: 1800,
-    health: 9.4,
-    description: 'Expansive tree canopy, natural evapotranspiration cooling, low particulate index.'
-  },
-  waterfront: {
-    id: 'waterfront',
-    name: 'Riparian Buffer Zone',
-    category: 'Water / Wetland',
-    temp: 24.1,
-    greenness: 42.1,
-    aqi: 62,
-    energy: 16500,
-    density: 3200,
-    health: 14.8,
-    description: 'Thermal inertia from open water body with mixed shoreline vegetation.'
-  }
-};
+const INDIAN_CITIES_PRESETS = [
+  'Delhi',
+  'Mumbai',
+  'Bengaluru',
+  'Hyderabad',
+  'Chennai',
+  'Kolkata',
+  'Ahmedabad',
+  'Pune',
+  'Jaipur',
+  'Lucknow',
+  'Shimla',
+  'Guwahati',
+  'Bhopal',
+  'Patna',
+  'Chandigarh',
+  'Kochi'
+];
 
 export const HistoricalComparisonPage: React.FC = () => {
-  const [nodeA, setNodeA] = useState<string>('urban_core');
-  const [nodeB, setNodeB] = useState<string>('green_canopy');
+  const [cityA, setCityA] = useState<string>('Delhi');
+  const [cityB, setCityB] = useState<string>('Bengaluru');
+  const [comparisonMode, setComparisonMode] = useState<'cities' | 'temporal'>('cities');
+  const [temporalCity, setTemporalCity] = useState<string>('Delhi');
 
-  const archA = ARCHETYPES[nodeA];
-  const archB = ARCHETYPES[nodeB];
+  const [loading, setLoading] = useState<boolean>(false);
+  const [comparisonData, setComparisonData] = useState<CityComparisonResult>({
+    city_a: { name: 'Delhi', state: 'Delhi', lst_c: 36.8, ndvi: 0.18, ndbi: 0.22, elevation_m: 216 },
+    city_b: { name: 'Bengaluru', state: 'Karnataka', lst_c: 29.5, ndvi: 0.38, ndbi: 0.08, elevation_m: 920 },
+    delta: { lst_c: -7.3, ndvi: +0.20, ndbi: -0.14, elevation_m: +704 }
+  });
 
-  const tempDelta = archB.temp - archA.temp;
-  const greenDelta = archB.greenness - archA.greenness;
-  const aqiDelta = archB.aqi - archA.aqi;
-  const healthDelta = archB.health - archA.health;
+  useEffect(() => {
+    setLoading(true);
+    let url = `/api/comparison?city_a=${encodeURIComponent(cityA)}&city_b=${encodeURIComponent(cityB)}`;
+    if (comparisonMode === 'temporal') {
+      url = `/api/comparison?city_a=${encodeURIComponent(temporalCity)}&city_b=${encodeURIComponent(temporalCity)}&year_a=2021&year_b=2025`;
+    }
+
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch comparison');
+        return res.json();
+      })
+      .then((data) => {
+        if (data && data.entity_a && data.entity_b) {
+          setComparisonData({
+            city_a: {
+              name: data.entity_a.city || (comparisonMode === 'temporal' ? `${temporalCity} (2021)` : cityA),
+              state: data.entity_a.state || '',
+              lst_c: data.entity_a.lst_c ?? data.entity_a.temperature_c ?? 30.0,
+              ndvi: data.entity_a.ndvi ?? 0.25,
+              ndbi: data.entity_a.ndbi ?? 0.1,
+              elevation_m: data.entity_a.elevation_m ?? 200
+            },
+            city_b: {
+              name: data.entity_b.city || (comparisonMode === 'temporal' ? `${temporalCity} (2025)` : cityB),
+              state: data.entity_b.state || '',
+              lst_c: data.entity_b.lst_c ?? data.entity_b.temperature_c ?? 30.0,
+              ndvi: data.entity_b.ndvi ?? 0.25,
+              ndbi: data.entity_b.ndbi ?? 0.1,
+              elevation_m: data.entity_b.elevation_m ?? 200
+            },
+            delta: {
+              lst_c: data.delta.lst_c ?? data.delta.temperature_c ?? 0.0,
+              ndvi: data.delta.ndvi ?? 0.0,
+              ndbi: data.delta.ndbi ?? 0.0,
+              elevation_m: (data.entity_b.elevation_m || 0) - (data.entity_a.elevation_m || 0)
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('Using local comparison fallback:', err);
+      })
+      .finally(() => setLoading(false));
+  }, [cityA, cityB, comparisonMode, temporalCity]);
 
   return (
     <div style={{
@@ -90,345 +117,338 @@ export const HistoricalComparisonPage: React.FC = () => {
         <div style={{
           fontSize: '0.7rem',
           letterSpacing: '0.28em',
-          color: '#9e855c',
+          color: 'var(--text-secondary)',
           textTransform: 'uppercase',
           marginBottom: '0.5rem'
         }}>
-          COMPARATIVE MICROCLIMATE ATLAS
+          COMPARATIVE MICROCLIMATE ATLAS · INDIA CITIES (2021–2025)
         </div>
         <h1 style={{
           fontSize: '2.4rem',
           fontFamily: "'Cinzel', Georgia, serif",
-          color: '#f4ede2',
+          color: 'var(--text-primary)',
           letterSpacing: '0.04em',
           margin: 0
         }}>
-          Then / Now · Comparative Analysis
+          Microclimate &amp; Temporal Comparison
         </h1>
         <p style={{
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: '#998a76',
+          color: 'var(--text-muted)',
           fontSize: '0.9rem',
           marginTop: '0.4rem',
-          maxWidth: '750px'
+          maxWidth: '750px',
+          lineHeight: 1.6
         }}>
-          Compare contrasting urban and environmental conditions. Because the verified Kaggle dataset is cross-sectional without longitudinal timestamps, this view contrasts empirical land-cover regimes and microclimate deltas rather than fabricated historical timelines.
+          Evaluate empirical microclimate divergence across contrasting Indian municipal environments or inspect 2021 vs 2025 multi-year satellite shifts.
         </p>
       </div>
 
-      {/* Honest Scientific Limitation Notice */}
+      {/* Mode Switcher */}
       <div style={{
-        background: '#16110a',
-        border: '1px solid #36281a',
-        borderRadius: '6px',
-        padding: '0.85rem 1.25rem',
-        marginBottom: '2rem',
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        fontSize: '0.8rem',
-        color: '#c5a059',
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        marginBottom: '1.5rem',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '6px',
+        padding: '8px 14px',
+        width: 'fit-content'
       }}>
-        <AlertCircle size={18} style={{ flexShrink: 0 }} />
-        <div>
-          <strong>Provenance Transparency:</strong> Original dataset does not contain historical time-series or multi-year satellite passes. All comparative figures reflect cross-sectional differences across modeled urban archetypes.
-        </div>
+        <button
+          onClick={() => setComparisonMode('cities')}
+          style={{
+            background: comparisonMode === 'cities' ? 'var(--gold-primary)' : 'transparent',
+            color: comparisonMode === 'cities' ? '#1a1208' : 'var(--text-secondary)',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '6px 14px',
+            fontSize: '12px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontFamily: "'Cinzel', serif"
+          }}
+        >
+          Compare Two Indian Cities
+        </button>
+        <button
+          onClick={() => setComparisonMode('temporal')}
+          style={{
+            background: comparisonMode === 'temporal' ? 'var(--gold-primary)' : 'transparent',
+            color: comparisonMode === 'temporal' ? '#1a1208' : 'var(--text-secondary)',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '6px 14px',
+            fontSize: '12px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontFamily: "'Cinzel', serif"
+          }}
+        >
+          5-Year Temporal Trend (2021 vs 2025)
+        </button>
       </div>
 
-      {/* Synchronized Archetype Selector */}
+      {/* Selection Selectors */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr auto 1fr',
-        gap: '1.5rem',
+        display: 'flex',
         alignItems: 'center',
-        marginBottom: '2rem'
-      }} className="grid-cols-1 md:grid-cols-[1fr_auto_1fr]">
+        gap: '1.5rem',
+        marginBottom: '2rem',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-accent)',
+        borderRadius: '6px',
+        padding: '1.25rem 1.75rem',
+        flexWrap: 'wrap'
+      }}>
+        {comparisonMode === 'cities' ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: "'Cinzel', serif" }}>CITY A:</span>
+              <select
+                value={cityA}
+                onChange={(e) => setCityA(e.target.value)}
+                style={{
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-accent)',
+                  color: 'var(--text-primary)',
+                  borderRadius: '4px',
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  fontFamily: "'Cinzel', Georgia, serif",
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {INDIAN_CITIES_PRESETS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
 
-        {/* Node A Selection */}
-        <div style={{
-          background: '#140f0a',
-          border: '1px solid #281e14',
-          borderRadius: '6px',
-          padding: '1.25rem'
-        }}>
-          <label style={{
-            display: 'block',
-            fontSize: '0.7rem',
-            letterSpacing: '0.18em',
-            color: '#9e855c',
-            textTransform: 'uppercase',
-            marginBottom: '0.5rem'
-          }}>
-            CONDITION A (BASELINE / "THEN")
-          </label>
-          <select
-            value={nodeA}
-            onChange={(e) => setNodeA(e.target.value)}
-            style={{
-              width: '100%',
-              background: '#1f1811',
-              border: '1px solid #3d2d1e',
-              color: '#f4ede2',
-              padding: '8px 12px',
-              borderRadius: '4px',
-              fontSize: '0.88rem',
-              fontFamily: "'Cinzel', Georgia, serif",
-              outline: 'none'
-            }}
-          >
-            {Object.values(ARCHETYPES).map((a) => (
-              <option key={a.id} value={a.id}>{a.name} ({a.category})</option>
-            ))}
-          </select>
-        </div>
+            <div style={{ color: 'var(--gold-primary)', display: 'flex', alignItems: 'center' }}>
+              <ArrowLeftRight size={20} />
+            </div>
 
-        {/* Central Swap Icon */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '10px',
-          color: '#d4af37'
-        }}>
-          <ArrowLeftRight size={24} />
-        </div>
-
-        {/* Node B Selection */}
-        <div style={{
-          background: '#140f0a',
-          border: '1px solid #281e14',
-          borderRadius: '6px',
-          padding: '1.25rem'
-        }}>
-          <label style={{
-            display: 'block',
-            fontSize: '0.7rem',
-            letterSpacing: '0.18em',
-            color: '#9e855c',
-            textTransform: 'uppercase',
-            marginBottom: '0.5rem'
-          }}>
-            CONDITION B (CONTRAST / "NOW")
-          </label>
-          <select
-            value={nodeB}
-            onChange={(e) => setNodeB(e.target.value)}
-            style={{
-              width: '100%',
-              background: '#1f1811',
-              border: '1px solid #3d2d1e',
-              color: '#f4ede2',
-              padding: '8px 12px',
-              borderRadius: '4px',
-              fontSize: '0.88rem',
-              fontFamily: "'Cinzel', Georgia, serif",
-              outline: 'none'
-            }}
-          >
-            {Object.values(ARCHETYPES).map((a) => (
-              <option key={a.id} value={a.id}>{a.name} ({a.category})</option>
-            ))}
-          </select>
-        </div>
-
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: "'Cinzel', serif" }}>CITY B:</span>
+              <select
+                value={cityB}
+                onChange={(e) => setCityB(e.target.value)}
+                style={{
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-accent)',
+                  color: 'var(--text-primary)',
+                  borderRadius: '4px',
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  fontFamily: "'Cinzel', Georgia, serif",
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {INDIAN_CITIES_PRESETS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          </>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: "'Cinzel', serif" }}>INSPECT TEMPORAL TRAJECTORY FOR:</span>
+            <select
+              value={temporalCity}
+              onChange={(e) => setTemporalCity(e.target.value)}
+              style={{
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-accent)',
+                color: 'var(--text-primary)',
+                borderRadius: '4px',
+                padding: '6px 12px',
+                fontSize: '13px',
+                fontFamily: "'Cinzel', Georgia, serif",
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              {INDIAN_CITIES_PRESETS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <span style={{ fontSize: '0.78rem', color: 'var(--gold-primary)' }}>Comparing Year 2021 (Baseline) vs Year 2025 (Latest)</span>
+          </div>
+        )}
       </div>
 
-      {/* Side-by-Side Comparison Panels */}
+      {/* Comparison Cards Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '2rem',
+        gridTemplateColumns: '1fr 0.45fr 1fr',
+        gap: '1.5rem',
+        alignItems: 'stretch',
         marginBottom: '2rem'
-      }} className="grid-cols-1 md:grid-cols-2">
+      }} className="grid-cols-1 lg:grid-cols-[1fr_0.45fr_1fr]">
 
         {/* Card A */}
         <div style={{
-          background: 'radial-gradient(ellipse at top left, #1a130c, #110d08)',
-          border: '1px solid #33261a',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-accent)',
           borderRadius: '6px',
-          padding: '1.75rem'
+          padding: '1.75rem',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <div>
-              <span style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: '#887762', textTransform: 'uppercase' }}>
-                {archA.category}
-              </span>
-              <h2 style={{ fontSize: '1.4rem', fontFamily: "'Cinzel', Georgia, serif", color: '#f4ede2', margin: '4px 0' }}>
-                {archA.name}
-              </h2>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            PRIMARY OBSERVATION NODE
+          </div>
+          <h2 style={{ fontSize: '2rem', fontFamily: "'Cinzel', Georgia, serif", margin: '0.3rem 0', color: 'var(--text-primary)' }}>
+            {comparisonData.city_a.name}
+          </h2>
+          <div style={{ fontSize: '0.85rem', color: 'var(--gold-primary)', marginBottom: '1.5rem' }}>
+            {comparisonData.city_a.state ? `${comparisonData.city_a.state}, India` : 'India Observation'}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Surface LST (°C):</span>
+              <strong style={{ fontSize: '1.1rem', color: comparisonData.city_a.lst_c > 33 ? '#e74c3c' : '#2ecc71' }}>
+                {comparisonData.city_a.lst_c.toFixed(1)}°C
+              </strong>
             </div>
-            <div style={{
-              fontSize: '2.2rem',
-              fontFamily: "'Cinzel', Georgia, serif",
-              fontWeight: 700,
-              color: archA.temp > 30 ? '#e74c3c' : '#58d68d'
-            }}>
-              {archA.temp.toFixed(1)}°C
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Vegetation (NDVI):</span>
+              <strong style={{ fontSize: '1.1rem', color: '#27ae60' }}>
+                {comparisonData.city_a.ndvi.toFixed(3)}
+              </strong>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Built-Up Index (NDBI):</span>
+              <strong style={{ fontSize: '1.1rem', color: '#e67e22' }}>
+                {comparisonData.city_a.ndbi.toFixed(3)}
+              </strong>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Elevation:</span>
+              <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+                {Math.round(comparisonData.city_a.elevation_m)}m
+              </strong>
             </div>
           </div>
-          <p style={{
-            fontSize: '0.82rem',
-            color: '#8b7a66',
-            marginTop: '0.5rem',
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          }}>
-            {archA.description}
-          </p>
+        </div>
+
+        {/* Delta Center Card */}
+        <div style={{
+          background: 'rgba(212, 175, 55, 0.05)',
+          border: '1px solid var(--border-accent)',
+          borderRadius: '6px',
+          padding: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+        }}>
+          <div style={{ fontSize: '0.7rem', letterSpacing: '0.2em', color: 'var(--gold-primary)', fontWeight: 700, marginBottom: '0.75rem' }}>
+            OBSERVED DELTA (B − A)
+          </div>
 
           <div style={{
-            marginTop: '1.5rem',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '12px',
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-            fontSize: '0.85rem'
+            fontSize: '2.2rem',
+            fontFamily: "'Cinzel', serif",
+            fontWeight: 700,
+            color: comparisonData.delta.lst_c > 0 ? '#e74c3c' : '#2ecc71',
+            margin: '0.25rem 0'
           }}>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>CANOPY COVER</div>
-              <div style={{ color: '#58d68d', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archA.greenness}%</div>
+            {comparisonData.delta.lst_c > 0 ? `+${comparisonData.delta.lst_c.toFixed(1)}°C` : `${comparisonData.delta.lst_c.toFixed(1)}°C`}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+            {comparisonData.delta.lst_c > 0 ? 'Warmer Thermal Regime' : 'Cooler Thermal Regime'}
+          </div>
+
+          <div style={{ width: '100%', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Δ NDVI:</span>
+              <span style={{ color: comparisonData.delta.ndvi >= 0 ? '#27ae60' : '#e74c3c', fontWeight: 600 }}>
+                {comparisonData.delta.ndvi >= 0 ? `+${comparisonData.delta.ndvi.toFixed(3)}` : comparisonData.delta.ndvi.toFixed(3)}
+              </span>
             </div>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>AIR QUALITY (AQI)</div>
-              <div style={{ color: '#e6c875', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archA.aqi}</div>
-            </div>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>ENERGY USAGE</div>
-              <div style={{ color: '#f4ede2', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archA.energy.toLocaleString()} kWh</div>
-            </div>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>HEALTH IMPACT</div>
-              <div style={{ color: '#e74c3c', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archA.health} /100k</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Δ NDBI:</span>
+              <span style={{ color: comparisonData.delta.ndbi <= 0 ? '#27ae60' : '#e74c3c', fontWeight: 600 }}>
+                {comparisonData.delta.ndbi >= 0 ? `+${comparisonData.delta.ndbi.toFixed(3)}` : comparisonData.delta.ndbi.toFixed(3)}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Card B */}
         <div style={{
-          background: 'radial-gradient(ellipse at top left, #1a130c, #110d08)',
-          border: '1px solid #33261a',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-accent)',
           borderRadius: '6px',
-          padding: '1.75rem'
+          padding: '1.75rem',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <div>
-              <span style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: '#887762', textTransform: 'uppercase' }}>
-                {archB.category}
-              </span>
-              <h2 style={{ fontSize: '1.4rem', fontFamily: "'Cinzel', Georgia, serif", color: '#f4ede2', margin: '4px 0' }}>
-                {archB.name}
-              </h2>
-            </div>
-            <div style={{
-              fontSize: '2.2rem',
-              fontFamily: "'Cinzel', Georgia, serif",
-              fontWeight: 700,
-              color: archB.temp > 30 ? '#e74c3c' : '#58d68d'
-            }}>
-              {archB.temp.toFixed(1)}°C
-            </div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            COMPARATIVE OBSERVATION NODE
           </div>
-          <p style={{
-            fontSize: '0.82rem',
-            color: '#8b7a66',
-            marginTop: '0.5rem',
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          }}>
-            {archB.description}
-          </p>
+          <h2 style={{ fontSize: '2rem', fontFamily: "'Cinzel', Georgia, serif", margin: '0.3rem 0', color: 'var(--text-primary)' }}>
+            {comparisonData.city_b.name}
+          </h2>
+          <div style={{ fontSize: '0.85rem', color: 'var(--gold-primary)', marginBottom: '1.5rem' }}>
+            {comparisonData.city_b.state ? `${comparisonData.city_b.state}, India` : 'India Observation'}
+          </div>
 
-          <div style={{
-            marginTop: '1.5rem',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '12px',
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-            fontSize: '0.85rem'
-          }}>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>CANOPY COVER</div>
-              <div style={{ color: '#58d68d', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archB.greenness}%</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Surface LST (°C):</span>
+              <strong style={{ fontSize: '1.1rem', color: comparisonData.city_b.lst_c > 33 ? '#e74c3c' : '#2ecc71' }}>
+                {comparisonData.city_b.lst_c.toFixed(1)}°C
+              </strong>
             </div>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>AIR QUALITY (AQI)</div>
-              <div style={{ color: '#e6c875', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archB.aqi}</div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Vegetation (NDVI):</span>
+              <strong style={{ fontSize: '1.1rem', color: '#27ae60' }}>
+                {comparisonData.city_b.ndvi.toFixed(3)}
+              </strong>
             </div>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>ENERGY USAGE</div>
-              <div style={{ color: '#f4ede2', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archB.energy.toLocaleString()} kWh</div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Built-Up Index (NDBI):</span>
+              <strong style={{ fontSize: '1.1rem', color: '#e67e22' }}>
+                {comparisonData.city_b.ndbi.toFixed(3)}
+              </strong>
             </div>
-            <div style={{ background: '#16110a', border: '1px solid #231b14', padding: '10px', borderRadius: '4px' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7a6b57' }}>HEALTH IMPACT</div>
-              <div style={{ color: '#e74c3c', fontWeight: 600, fontSize: '1.05rem', marginTop: '2px' }}>{archB.health} /100k</div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Elevation:</span>
+              <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+                {Math.round(comparisonData.city_b.elevation_m)}m
+              </strong>
             </div>
           </div>
         </div>
 
       </div>
 
-      {/* DELTA SUMMARY BAR */}
+      {/* Scientific Distinction Footer */}
       <div style={{
-        background: '#151009',
-        border: '1px solid #3d2d1e',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
         borderRadius: '6px',
-        padding: '1.5rem',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '1.5rem',
-        textAlign: 'center',
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-      }} className="grid-cols-2 md:grid-cols-4">
-        <div>
-          <div style={{ fontSize: '0.72rem', color: '#887762', textTransform: 'uppercase' }}>TEMPERATURE DELTA</div>
-          <div style={{
-            fontSize: '1.5rem',
-            fontFamily: "'Cinzel', Georgia, serif",
-            fontWeight: 700,
-            marginTop: '4px',
-            color: tempDelta <= 0 ? '#58d68d' : '#e74c3c'
-          }}>
-            {tempDelta > 0 ? `+${tempDelta.toFixed(1)}°C` : `${tempDelta.toFixed(1)}°C`}
-          </div>
+        padding: '1.25rem 1.5rem',
+        fontSize: '0.82rem',
+        lineHeight: 1.6,
+        color: 'var(--text-muted)'
+      }}>
+        <div style={{ color: 'var(--gold-primary)', fontWeight: 700, marginBottom: '4px', fontFamily: "'Cinzel', serif" }}>
+          Scientific Integrity &amp; Causality Note:
         </div>
-
-        <div>
-          <div style={{ fontSize: '0.72rem', color: '#887762', textTransform: 'uppercase' }}>CANOPY EXPANSION</div>
-          <div style={{
-            fontSize: '1.5rem',
-            fontFamily: "'Cinzel', Georgia, serif",
-            fontWeight: 700,
-            marginTop: '4px',
-            color: greenDelta >= 0 ? '#58d68d' : '#e74c3c'
-          }}>
-            {greenDelta > 0 ? `+${greenDelta.toFixed(1)}%` : `${greenDelta.toFixed(1)}%`}
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: '0.72rem', color: '#887762', textTransform: 'uppercase' }}>AQI DIFFERENCE</div>
-          <div style={{
-            fontSize: '1.5rem',
-            fontFamily: "'Cinzel', Georgia, serif",
-            fontWeight: 700,
-            marginTop: '4px',
-            color: aqiDelta <= 0 ? '#58d68d' : '#e74c3c'
-          }}>
-            {aqiDelta > 0 ? `+${aqiDelta}` : `${aqiDelta}`}
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: '0.72rem', color: '#887762', textTransform: 'uppercase' }}>MORTALITY BURDEN</div>
-          <div style={{
-            fontSize: '1.5rem',
-            fontFamily: "'Cinzel', Georgia, serif",
-            fontWeight: 700,
-            marginTop: '4px',
-            color: healthDelta <= 0 ? '#58d68d' : '#e74c3c'
-          }}>
-            {healthDelta > 0 ? `+${healthDelta.toFixed(1)}` : `${healthDelta.toFixed(1)}`}
-          </div>
-        </div>
+        Observational temperature differences reflect multi-factorial geographic, meteorological, and elevation regimes. Observational cross-sectional correlations do not imply that modifying one city's built-up index in isolation will unilaterally eliminate the observed temperature delta.
       </div>
     </div>
   );

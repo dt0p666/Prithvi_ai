@@ -170,18 +170,19 @@ export const HomePage: React.FC = () => {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1.5rem',
+              gap: '1.25rem',
               marginTop: '1rem',
               paddingTop: '1.25rem',
               borderTop: '1px solid var(--border-color)',
               fontSize: '0.75rem',
-              color: 'var(--text-muted)'
+              color: 'var(--text-muted)',
+              flexWrap: 'wrap'
             }}>
-              <div><strong style={{ color: 'var(--gold-primary)' }}>500</strong> Monitored Cities</div>
+              <div><strong style={{ color: 'var(--gold-primary)' }}>97</strong> Indian Cities (2021–2025)</div>
               <div>•</div>
-              <div><strong style={{ color: 'var(--gold-primary)' }}>15</strong> Indicators</div>
+              <div><strong style={{ color: 'var(--gold-primary)' }}>23</strong> States</div>
               <div>•</div>
-              <div><strong style={{ color: '#27ae60' }}>LightGBM &amp; RF</strong> Trained</div>
+              <div><strong style={{ color: '#27ae60' }}>LightGBM R² 0.92</strong> Model</div>
             </div>
           </div>
 

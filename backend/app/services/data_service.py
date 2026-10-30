@@ -19,7 +19,8 @@ class DataService:
         df = pd.read_csv(self.csv_path, encoding='utf-8')
 
         # Clean column names mapping
-        # Normalize degree symbol and square symbol if needed while preserving semantic physical names
+        # Target column: LST (°C)
+        self.target_col = [c for c in df.columns if 'LST' in c][0]
         self._df = df
 
     @property
@@ -31,29 +32,30 @@ class DataService:
     def get_metadata(self) -> Dict[str, Any]:
         df = self.df
         return {
-            "dataset_name": "Urban Heat Island (UHI) Dataset",
-            "provenance": "Kaggle Open Benchmark",
-            "is_simulation": True,
-            "simulation_notice": "Contains 500 simulated city nodes with 15 environmental and socioeconomic features. All records represent cross-sectional synthetic entities.",
+            "dataset_name": "India Cities Climate & Land Surface Temperature (2021-2025)",
+            "coverage": "97 Indian Cities across 23 States",
+            "time_range": "2021 - 2025 (Monthly Satellite Passes)",
+            "cities_count": int(df['City'].nunique()),
+            "states_count": int(df['State'].nunique()),
             "total_rows": len(df),
             "total_columns": len(df.columns),
+            "target_variable": self.target_col,
+            "target_units": "°C",
             "columns": [
-                {"name": "City Name", "type": "string", "units": "identifier"},
-                {"name": "Latitude", "type": "float", "units": "degrees (-90 to +90)"},
-                {"name": "Longitude", "type": "float", "units": "degrees (-180 to +180)"},
-                {"name": "Elevation (m)", "type": "float", "units": "meters"},
-                {"name": "Temperature (°C)", "type": "float", "units": "degrees Celsius (°C)", "role": "target"},
-                {"name": "Land Cover", "type": "categorical", "categories": ["Water", "Green Space", "Industrial", "Urban"]},
-                {"name": "Population Density (people/km²)", "type": "integer", "units": "people/km²"},
-                {"name": "Energy Consumption (kWh)", "type": "float", "units": "kilowatt-hours"},
-                {"name": "Air Quality Index (AQI)", "type": "integer", "units": "AQI index (0-200)"},
-                {"name": "Urban Greenness Ratio (%)", "type": "float", "units": "percentage (0-100%)"},
-                {"name": "Health Impact (Mortality Rate/100k)", "type": "float", "units": "mortality per 100,000"},
-                {"name": "Wind Speed (km/h)", "type": "float", "units": "kilometers per hour"},
-                {"name": "Humidity (%)", "type": "float", "units": "percentage (0-100%)"},
-                {"name": "Annual Rainfall (mm)", "type": "float", "units": "millimeters"},
-                {"name": "GDP per Capita (USD)", "type": "float", "units": "US Dollars"}
+                {"name": "City", "type": "string", "units": "Indian Municipality"},
+                {"name": "State", "type": "string", "units": "State / Union Territory"},
+                {"name": "Latitude", "type": "float", "units": "degrees North (8.5° to 34.5°)"},
+                {"name": "Longitude", "type": "float", "units": "degrees East (72.8° to 92.6°)"},
+                {"name": "Year", "type": "integer", "units": "2021 to 2025"},
+                {"name": "Month", "type": "string", "units": "Calendar Month"},
+                {"name": "NDVI", "type": "float", "units": "Normalized Difference Vegetation Index (-0.2 to 0.9)"},
+                {"name": "NDBI", "type": "float", "units": "Normalized Difference Built-up Index (-0.4 to 0.31)"},
+                {"name": "NDWI", "type": "float", "units": "Normalized Difference Water Index (-0.5 to 0.21)"},
+                {"name": "Elevation (m)", "type": "integer", "units": "meters above sea level"},
+                {"name": self.target_col, "type": "float", "units": "degrees Celsius (°C)", "role": "target"}
             ],
+            "unique_cities_count": int(df["City"].nunique()),
+            "unique_states_count": int(df["State"].nunique()),
             "missing_values_count": int(df.isnull().sum().sum()),
             "duplicate_records_count": int(df.duplicated().sum())
         }
@@ -64,40 +66,60 @@ class DataService:
         summary_stats = {}
         for col in numeric_df.columns:
             summary_stats[col] = {
-                "mean": round(float(df[col].mean()), 2),
-                "std": round(float(df[col].std()), 2),
-                "min": round(float(df[col].min()), 2),
-                "25%": round(float(df[col].quantile(0.25)), 2),
-                "50%": round(float(df[col].median()), 2),
-                "75%": round(float(df[col].quantile(0.75)), 2),
-                "max": round(float(df[col].max()), 2)
+                "mean": round(float(df[col].mean()), 3),
+                "std": round(float(df[col].std()), 3),
+                "min": round(float(df[col].min()), 3),
+                "25%": round(float(df[col].quantile(0.25)), 3),
+                "50%": round(float(df[col].median()), 3),
+                "75%": round(float(df[col].quantile(0.75)), 3),
+                "max": round(float(df[col].max()), 3)
             }
 
-        land_cover_counts = df['Land Cover'].value_counts().to_dict()
+        state_counts = df['State'].value_counts().head(10).to_dict()
+        year_counts = df['Year'].value_counts().sort_index().to_dict()
 
         return {
-            "total_cities": len(df),
+            "total_observations": len(df),
+            "unique_cities": int(df["City"].nunique()),
             "numeric_distributions": summary_stats,
-            "land_cover_distribution": land_cover_counts,
-            "target_variable": "Temperature (°C)",
-            "mean_temperature": round(float(df["Temperature (°C)"].mean()), 2),
-            "mean_greenness": round(float(df["Urban Greenness Ratio (%)"].mean()), 2),
-            "mean_aqi": round(float(df["Air Quality Index (AQI)"].mean()), 2),
-            "mean_density": round(float(df["Population Density (people/km²)"].mean()), 2)
+            "state_distribution_top10": state_counts,
+            "year_distribution": {str(k): v for k, v in year_counts.items()},
+            "target_variable": self.target_col,
+            "mean_lst": round(float(df[self.target_col].mean()), 2),
+            "mean_ndvi": round(float(df["NDVI"].mean()), 3),
+            "mean_ndbi": round(float(df["NDBI"].mean()), 3),
+            "mean_ndwi": round(float(df["NDWI"].mean()), 3)
         }
 
     def get_locations(self) -> List[Dict[str, Any]]:
         df = self.df
+        # Group by City to get unique representative node for the geographical map
+        grouped = df.groupby("City").agg({
+            "State": "first",
+            "Latitude": "first",
+            "Longitude": "first",
+            "Elevation (m)": "mean",
+            self.target_col: "mean",
+            "NDVI": "mean",
+            "NDBI": "mean",
+            "NDWI": "mean"
+        }).reset_index()
+
         locations = []
-        for _, row in df.iterrows():
+        for _, row in grouped.iterrows():
             locations.append({
-                "city_name": str(row["City Name"]),
+                "city_name": str(row["City"]).strip(),
+                "state": str(row["State"]).strip(),
                 "latitude": round(float(row["Latitude"]), 4),
                 "longitude": round(float(row["Longitude"]), 4),
                 "elevation_m": round(float(row["Elevation (m)"]), 1),
-                "temperature_c": round(float(row["Temperature (°C)"]), 2),
-                "land_cover": str(row["Land Cover"]),
-                "greenness_pct": round(float(row["Urban Greenness Ratio (%)"]), 2)
+                "temperature_c": round(float(row[self.target_col]), 2),
+                "lst_c": round(float(row[self.target_col]), 2),
+                "ndvi": round(float(row["NDVI"]), 3),
+                "ndbi": round(float(row["NDBI"]), 3),
+                "ndwi": round(float(row["NDWI"]), 3),
+                "greenness_pct": round(max(0.0, float(row["NDVI"]) * 100), 1),
+                "land_cover": "Urban Fabric" if row["NDBI"] > 0 else "Vegetated / Mixed"
             })
         return locations
 
@@ -105,32 +127,64 @@ class DataService:
         self,
         page: int = 1,
         limit: int = 50,
-        land_cover: Optional[str] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        year: Optional[int] = None,
+        month: Optional[str] = None,
         search: Optional[str] = None,
         sort_by: str = "temp_desc"
     ) -> Dict[str, Any]:
         df = self.df
 
-        if land_cover and land_cover != "ALL":
-            df = df[df["Land Cover"] == land_cover]
+        if city:
+            df = df[df["City"].str.lower() == city.lower()]
+        if state:
+            df = df[df["State"].str.lower() == state.lower()]
+        if year:
+            df = df[df["Year"] == year]
+        if month:
+            df = df[df["Month"].str.lower() == month.lower()]
 
         if search:
             search_str = search.lower()
-            df = df[df["City Name"].str.lower().str.contains(search_str) | df["Land Cover"].str.lower().str.contains(search_str)]
+            df = df[df["City"].str.lower().str.contains(search_str) | df["State"].str.lower().str.contains(search_str)]
 
         if sort_by == "temp_desc":
-            df = df.sort_values(by="Temperature (°C)", ascending=False)
+            df = df.sort_values(by=self.target_col, ascending=False)
         elif sort_by == "temp_asc":
-            df = df.sort_values(by="Temperature (°C)", ascending=True)
-        elif sort_by == "green_desc":
-            df = df.sort_values(by="Urban Greenness Ratio (%)", ascending=False)
+            df = df.sort_values(by=self.target_col, ascending=True)
+        elif sort_by == "green_desc" or sort_by == "ndvi_desc":
+            df = df.sort_values(by="NDVI", ascending=False)
+        elif sort_by == "ndbi_desc":
+            df = df.sort_values(by="NDBI", ascending=False)
 
         total_matching = len(df)
         start_idx = (page - 1) * limit
         end_idx = start_idx + limit
         paginated_df = df.iloc[start_idx:end_idx]
 
-        items = paginated_df.to_dict(orient="records")
+        # Standardize field names for seamless frontend compatibility
+        items = []
+        for _, row in paginated_df.iterrows():
+            c_name = str(row["City"]).strip()
+            items.append({
+                "City Name": c_name,
+                "City": c_name,
+                "State": str(row["State"]).strip(),
+                "Latitude": float(row["Latitude"]),
+                "Longitude": float(row["Longitude"]),
+                "Year": int(row["Year"]),
+                "Month": str(row["Month"]),
+                "NDVI": round(float(row["NDVI"]), 3),
+                "NDBI": round(float(row["NDBI"]), 3),
+                "NDWI": round(float(row["NDWI"]), 3),
+                "Elevation (m)": int(row["Elevation (m)"]),
+                "Temperature (°C)": round(float(row[self.target_col]), 2),
+                "LST (°C)": round(float(row[self.target_col]), 2),
+                "Urban Greenness Ratio (%)": round(max(0.0, float(row["NDVI"]) * 100), 1),
+                "Land Cover": "Urban Fabric" if row["NDBI"] > 0 else "Vegetated Basin"
+            })
+
         return {
             "total": total_matching,
             "page": page,
@@ -142,44 +196,44 @@ class DataService:
     def get_indicators(self) -> List[Dict[str, Any]]:
         return [
             {
-                "id": "temperature",
-                "label": "Ambient Surface Temperature",
-                "column": "Temperature (°C)",
+                "id": "lst",
+                "label": "Land Surface Temperature (LST)",
+                "column": self.target_col,
                 "units": "°C",
-                "category": "Thermal",
-                "description": "Primary heat metric reflecting urban boundary-layer thermal state."
+                "category": "Thermal Target",
+                "description": "Satellite-derived thermal radiance representing surface skin temperature across Indian cities."
             },
             {
-                "id": "greenness",
-                "label": "Urban Greenness Ratio",
-                "column": "Urban Greenness Ratio (%)",
-                "units": "%",
+                "id": "ndvi",
+                "label": "Vegetation Index (NDVI)",
+                "column": "NDVI",
+                "units": "index (-0.2 to 0.9)",
                 "category": "Ecological",
-                "description": "Vegetative canopy fraction mitigating heat through evapotranspiration and shading."
+                "description": "Normalized Difference Vegetation Index quantifying active green canopy reflectance."
             },
             {
-                "id": "energy",
-                "label": "Energy Consumption",
-                "column": "Energy Consumption (kWh)",
-                "units": "kWh",
-                "category": "Anthropogenic",
-                "description": "Direct electrical and mechanical energy expenditure generating anthropogenic heat."
+                "id": "ndbi",
+                "label": "Built-Up Index (NDBI)",
+                "column": "NDBI",
+                "units": "index (-0.4 to 0.31)",
+                "category": "Urban Fabric",
+                "description": "Normalized Difference Built-Up Index tracking impermeable asphalt and concrete pavements."
             },
             {
-                "id": "aqi",
-                "label": "Air Quality Index",
-                "column": "Air Quality Index (AQI)",
-                "units": "AQI",
-                "category": "Atmospheric",
-                "description": "Atmospheric particulate and aerosol density contributing to radiative thermal trapping."
+                "id": "ndwi",
+                "label": "Water / Moisture Index (NDWI)",
+                "column": "NDWI",
+                "units": "index (-0.5 to 0.21)",
+                "category": "Hydrological",
+                "description": "Normalized Difference Water Index highlighting open water, wetlands, and soil moisture."
             },
             {
-                "id": "density",
-                "label": "Population Density",
-                "column": "Population Density (people/km²)",
-                "units": "people/km²",
-                "category": "Demographic",
-                "description": "Human concentration indexing thermal exposure and built-up compactness."
+                "id": "elevation",
+                "label": "Elevation",
+                "column": "Elevation (m)",
+                "units": "meters",
+                "category": "Topographic",
+                "description": "Height above mean sea level exerting adiabatic lapse-rate cooling."
             }
         ]
 
@@ -187,47 +241,58 @@ class DataService:
         self,
         city_a_name: Optional[str] = None,
         city_b_name: Optional[str] = None,
-        land_cover_a: Optional[str] = None,
-        land_cover_b: Optional[str] = None
+        year_a: Optional[int] = None,
+        year_b: Optional[int] = None
     ) -> Dict[str, Any]:
         df = self.df
 
-        if city_a_name and city_b_name:
-            ca = df[df["City Name"] == city_a_name]
-            cb = df[df["City Name"] == city_b_name]
-            if ca.empty or cb.empty:
-                raise ValueError("One or both specified cities not found.")
-            rec_a = ca.iloc[0].to_dict()
-            rec_b = cb.iloc[0].to_dict()
-            return {
-                "type": "city_pair",
-                "entity_a": rec_a,
-                "entity_b": rec_b,
-                "delta": {
-                    "temperature_c": round(float(rec_b["Temperature (°C)"] - rec_a["Temperature (°C)"]), 2),
-                    "greenness_pct": round(float(rec_b["Urban Greenness Ratio (%)"] - rec_a["Urban Greenness Ratio (%)"]), 2),
-                    "aqi": int(rec_b["Air Quality Index (AQI)"] - rec_a["Air Quality Index (AQI)"]),
-                    "energy_kwh": round(float(rec_b["Energy Consumption (kWh)"] - rec_a["Energy Consumption (kWh)"]), 2)
-                }
-            }
+        # If comparing two cities
+        c_a = (city_a_name or "Delhi").strip()
+        c_b = (city_b_name or "Bengaluru").strip()
 
-        # Compare land-cover aggregations
-        cover_a = land_cover_a or "Urban"
-        cover_b = land_cover_b or "Green Space"
-        agg_a = df[df["Land Cover"] == cover_a].mean(numeric_only=True).to_dict()
-        agg_b = df[df["Land Cover"] == cover_b].mean(numeric_only=True).to_dict()
+        df_a = df[df["City"].str.strip().str.lower() == c_a.lower()]
+        df_b = df[df["City"].str.strip().str.lower() == c_b.lower()]
+
+        if year_a:
+            df_a = df_a[df_a["Year"] == year_a]
+        if year_b:
+            df_b = df_b[df_b["Year"] == year_b]
+
+        mean_a = df_a[[self.target_col, "NDVI", "NDBI", "NDWI", "Elevation (m)"]].mean().to_dict() if not df_a.empty else {}
+        mean_b = df_b[[self.target_col, "NDVI", "NDBI", "NDWI", "Elevation (m)"]].mean().to_dict() if not df_b.empty else {}
+
+        delta_temp = round(float(mean_b.get(self.target_col, 0) - mean_a.get(self.target_col, 0)), 2)
+        delta_ndvi = round(float(mean_b.get("NDVI", 0) - mean_a.get("NDVI", 0)), 3)
+        delta_ndbi = round(float(mean_b.get("NDBI", 0) - mean_a.get("NDBI", 0)), 3)
 
         return {
-            "type": "land_cover_archetype",
-            "archetype_a": {"land_cover": cover_a, **{k: round(v, 2) for k, v in agg_a.items()}},
-            "archetype_b": {"land_cover": cover_b, **{k: round(v, 2) for k, v in agg_b.items()}},
+            "type": "city_comparison",
+            "entity_a": {
+                "city": c_a,
+                "year": year_a or "2021-2025 Average",
+                "temperature_c": round(float(mean_a.get(self.target_col, 0)), 2),
+                "lst_c": round(float(mean_a.get(self.target_col, 0)), 2),
+                "ndvi": round(float(mean_a.get("NDVI", 0)), 3),
+                "ndbi": round(float(mean_a.get("NDBI", 0)), 3),
+                "ndwi": round(float(mean_a.get("NDWI", 0)), 3),
+                "elevation_m": round(float(mean_a.get("Elevation (m)", 0)), 1)
+            },
+            "entity_b": {
+                "city": c_b,
+                "year": year_b or "2021-2025 Average",
+                "temperature_c": round(float(mean_b.get(self.target_col, 0)), 2),
+                "lst_c": round(float(mean_b.get(self.target_col, 0)), 2),
+                "ndvi": round(float(mean_b.get("NDVI", 0)), 3),
+                "ndbi": round(float(mean_b.get("NDBI", 0)), 3),
+                "ndwi": round(float(mean_b.get("NDWI", 0)), 3),
+                "elevation_m": round(float(mean_b.get("Elevation (m)", 0)), 1)
+            },
             "delta": {
-                "temperature_c": round(float(agg_b["Temperature (°C)"] - agg_a["Temperature (°C)"]), 2),
-                "greenness_pct": round(float(agg_b["Urban Greenness Ratio (%)"] - agg_a["Urban Greenness Ratio (%)"]), 2),
-                "aqi": round(float(agg_b["Air Quality Index (AQI)"] - agg_a["Air Quality Index (AQI)"]), 1),
-                "energy_kwh": round(float(agg_b["Energy Consumption (kWh)"] - agg_a["Energy Consumption (kWh)"]), 2)
+                "temperature_c": delta_temp,
+                "lst_c": delta_temp,
+                "ndvi": delta_ndvi,
+                "ndbi": delta_ndbi
             }
         }
 
-# Global singleton data service
 data_service = DataService()

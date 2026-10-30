@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Optional
 from app.services.inference_service import inference_service
 from app.api.routes.models import PredictInput
 
@@ -19,23 +19,26 @@ def run_scenario(payload: ScenarioRunRequest):
         base_res = inference_service.predict(baseline_data)
         scen_res = inference_service.predict(scenario_data)
 
-        b_temp = base_res["predicted_temperature_c"]
-        s_temp = scen_res["predicted_temperature_c"]
+        b_temp = base_res["predicted_lst_c"]
+        s_temp = scen_res["predicted_lst_c"]
         delta = round(s_temp - b_temp, 2)
 
-        is_ood = scenario_data["urban_greenness_ratio"] > 60.0 or scenario_data["energy_consumption_kwh"] > 50000.0
+        is_ood = scenario_data["ndvi"] > 0.85 or scenario_data["ndbi"] > 0.35
 
         caveats = [
-            "Sensitivity analysis derived from supervised regressor on cross-sectional benchmark data.",
-            "Observational associations do not establish physical microscale thermodynamic causality.",
+            "Sensitivity analysis derived from multi-year Indian satellite observations (2021-2025).",
+            "Observational associations reflect empirical satellite trends; actual thermodynamic cooling depends on urban canyon microphysics.",
         ]
         if is_ood:
-            caveats.append("One or more intervention parameters exceed the observed dataset envelope.")
+            caveats.append("One or more intervention parameters exceed typical empirical bounds.")
 
         return {
             "baseline_temperature_c": b_temp,
+            "baseline_lst_c": b_temp,
             "intervention_temperature_c": s_temp,
+            "intervention_lst_c": s_temp,
             "delta_temperature_c": delta,
+            "delta_lst_c": delta,
             "units": "°C",
             "is_out_of_distribution": is_ood,
             "model_version": base_res["model_version"],

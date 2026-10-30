@@ -1,121 +1,158 @@
 {
-  "target": "Temperature (\u00b0C)",
+  "dataset_name": "India Cities Climate & Land Surface Temperature (2021-2025)",
+  "target": "LST (\u00b0C)",
   "target_units": "\u00b0C",
-  "dataset_rows": 500,
-  "train_samples": 400,
-  "test_samples": 100,
+  "dataset_rows": 5587,
+  "train_samples": 4469,
+  "test_samples": 1118,
   "features": {
     "categorical": [
-      "Land Cover"
+      "Month",
+      "State"
     ],
     "numeric": [
+      "NDVI",
+      "NDBI",
+      "NDWI",
       "Elevation (m)",
-      "Population Density (people/km\u00b2)",
-      "Energy Consumption (kWh)",
-      "Air Quality Index (AQI)",
-      "Urban Greenness Ratio (%)",
-      "Wind Speed (km/h)",
-      "Humidity (%)",
-      "Annual Rainfall (mm)",
-      "GDP per Capita (USD)"
+      "Latitude",
+      "Longitude",
+      "Year"
     ]
   },
   "all_transformed_features": [
+    "NDVI",
+    "NDBI",
+    "NDWI",
     "Elevation (m)",
-    "Population Density (people/km\u00b2)",
-    "Energy Consumption (kWh)",
-    "Air Quality Index (AQI)",
-    "Urban Greenness Ratio (%)",
-    "Wind Speed (km/h)",
-    "Humidity (%)",
-    "Annual Rainfall (mm)",
-    "GDP per Capita (USD)",
-    "Land Cover_Green Space",
-    "Land Cover_Industrial",
-    "Land Cover_Urban",
-    "Land Cover_Water"
+    "Latitude",
+    "Longitude",
+    "Year",
+    "Month_April",
+    "Month_August",
+    "Month_December",
+    "Month_February",
+    "Month_January",
+    "Month_July",
+    "Month_June",
+    "Month_March",
+    "Month_May",
+    "Month_November",
+    "Month_October",
+    "Month_September",
+    "State_Andhra Pradesh",
+    "State_Assam",
+    "State_Bih\u0101r",
+    "State_Chand\u012bgarh",
+    "State_Chhatt\u012bsgarh",
+    "State_Delhi",
+    "State_Gujar\u0101t",
+    "State_Hary\u0101na",
+    "State_Him\u0101chal Pradesh",
+    "State_Jammu and Kashm\u012br",
+    "State_Jh\u0101rkhand",
+    "State_Karn\u0101taka",
+    "State_Kerala",
+    "State_Madhya Pradesh",
+    "State_Mah\u0101r\u0101shtra",
+    "State_Odisha",
+    "State_Punjab",
+    "State_R\u0101jasth\u0101n",
+    "State_Tamil N\u0101du",
+    "State_Telang\u0101na",
+    "State_Uttar Pradesh",
+    "State_Uttar\u0101khand",
+    "State_West Bengal"
   ],
   "models_benchmarked": {
     "DummyBaseline": {
       "model_name": "DummyBaseline",
-      "mae": 6.1507,
-      "rmse": 7.0233,
-      "r2": -0.0278,
-      "best_model": true
+      "mae": 4.8746,
+      "rmse": 6.3667,
+      "r2": -0.0002
     },
     "RidgeRegression": {
       "model_name": "RidgeRegression",
-      "mae": 6.1676,
-      "rmse": 7.2507,
-      "r2": -0.0954
+      "mae": 2.2618,
+      "rmse": 2.9738,
+      "r2": 0.7818
     },
     "RandomForest": {
       "model_name": "RandomForest",
-      "mae": 6.0323,
-      "rmse": 7.1177,
-      "r2": -0.0556
+      "mae": 1.6984,
+      "rmse": 2.3455,
+      "r2": 0.8643
     },
     "LightGBM": {
       "model_name": "LightGBM",
-      "mae": 6.243,
-      "rmse": 7.5374,
-      "r2": -0.1838
+      "mae": 1.2399,
+      "rmse": 1.7635,
+      "r2": 0.9233,
+      "best_model": true
     }
   },
-  "best_model": "DummyBaseline",
+  "best_model": "LightGBM",
   "feature_importances": [
     {
-      "feature": "Humidity (%)",
-      "importance": 0.1307
+      "feature": "Latitude",
+      "importance": 0.226
     },
     {
-      "feature": "Wind Speed (km/h)",
-      "importance": 0.1237
+      "feature": "Month_December",
+      "importance": 0.1521
     },
     {
-      "feature": "Energy Consumption (kWh)",
-      "importance": 0.1117
-    },
-    {
-      "feature": "Annual Rainfall (mm)",
-      "importance": 0.1062
+      "feature": "Month_January",
+      "importance": 0.1502
     },
     {
       "feature": "Elevation (m)",
-      "importance": 0.1055
+      "importance": 0.1242
     },
     {
-      "feature": "GDP per Capita (USD)",
-      "importance": 0.0993
+      "feature": "NDBI",
+      "importance": 0.0771
     },
     {
-      "feature": "Air Quality Index (AQI)",
-      "importance": 0.096
+      "feature": "Month_February",
+      "importance": 0.0734
     },
     {
-      "feature": "Urban Greenness Ratio (%)",
-      "importance": 0.0921
+      "feature": "Month_November",
+      "importance": 0.0693
     },
     {
-      "feature": "Population Density (people/km\u00b2)",
-      "importance": 0.0876
+      "feature": "Year",
+      "importance": 0.0272
     },
     {
-      "feature": "Land Cover_Urban",
-      "importance": 0.0237
+      "feature": "Month_October",
+      "importance": 0.023
     },
     {
-      "feature": "Land Cover_Green Space",
-      "importance": 0.0092
+      "feature": "Longitude",
+      "importance": 0.0184
     },
     {
-      "feature": "Land Cover_Water",
-      "importance": 0.0087
+      "feature": "Month_April",
+      "importance": 0.0098
     },
     {
-      "feature": "Land Cover_Industrial",
-      "importance": 0.0056
+      "feature": "NDWI",
+      "importance": 0.0093
+    },
+    {
+      "feature": "NDVI",
+      "importance": 0.0064
+    },
+    {
+      "feature": "State_Jammu and Kashm\u012br",
+      "importance": 0.0059
+    },
+    {
+      "feature": "Month_June",
+      "importance": 0.0042
     }
   ],
-  "timestamp": "2026-10-30T22:08:00Z"
+  "timestamp": "2026-10-30T23:03:00Z"
 }

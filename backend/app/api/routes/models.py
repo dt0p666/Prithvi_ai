@@ -1,21 +1,20 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Optional
 from app.services.inference_service import inference_service
 
 router = APIRouter()
 
 class PredictInput(BaseModel):
-    land_cover: Literal["Water", "Green Space", "Industrial", "Urban"] = "Urban"
-    elevation_m: float = Field(450.0, ge=0, le=9000, description="Elevation in meters")
-    population_density: int = Field(5000, ge=0, le=50000, description="Population density people/km²")
-    energy_consumption_kwh: float = Field(25000.0, ge=0, le=100000, description="Energy consumption in kWh")
-    aqi: int = Field(100, ge=0, le=500, description="Air Quality Index")
-    urban_greenness_ratio: float = Field(25.0, ge=0, le=100, description="Urban Greenness percentage")
-    wind_speed_kmh: float = Field(15.0, ge=0, le=150, description="Wind speed in km/h")
-    humidity_pct: float = Field(50.0, ge=0, le=100, description="Humidity percentage")
-    annual_rainfall_mm: float = Field(1500.0, ge=0, le=10000, description="Annual rainfall in mm")
-    gdp_per_capita: float = Field(25000.0, ge=0, le=200000, description="GDP per capita in USD")
+    month: str = Field("May", description="Month of observation")
+    state: str = Field("Delhi", description="State or Union Territory")
+    ndvi: float = Field(0.22, ge=-0.5, le=1.0, description="Normalized Difference Vegetation Index")
+    ndbi: float = Field(0.05, ge=-0.6, le=0.6, description="Normalized Difference Built-Up Index")
+    ndwi: float = Field(-0.24, ge=-0.8, le=0.8, description="Normalized Difference Water Index")
+    elevation_m: int = Field(250, ge=0, le=9000, description="Elevation in meters above sea level")
+    latitude: float = Field(28.61, ge=5.0, le=40.0, description="Latitude degrees North")
+    longitude: float = Field(77.20, ge=65.0, le=100.0, description="Longitude degrees East")
+    year: int = Field(2024, ge=2021, le=2030, description="Year of observation")
 
 @router.get("/models/metrics")
 def get_metrics():
