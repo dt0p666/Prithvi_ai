@@ -111,9 +111,10 @@ export const ScenarioLabPage: React.FC = () => {
   return (
     <div style={{
       minHeight: 'calc(100vh - 72px)',
-      backgroundColor: '#0c0a07',
+      backgroundColor: 'var(--bg-primary)',
       padding: '2.5rem 3rem',
-      color: '#e2d7c5'
+      color: 'var(--text-primary)',
+      transition: 'background-color 0.25s ease'
     }}>
       {/* Title */}
       <div style={{ marginBottom: '2rem' }}>
@@ -154,60 +155,60 @@ export const ScenarioLabPage: React.FC = () => {
         marginBottom: '2rem',
         flexWrap: 'wrap'
       }}>
-        <span style={{ fontSize: '0.72rem', letterSpacing: '0.15em', color: '#887762', textTransform: 'uppercase' }}>
+        <span style={{ fontSize: '0.72rem', letterSpacing: '0.15em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
           Intervention Presets:
         </span>
         <button
           onClick={() => applyPreset('canopy')}
           style={{
-            background: '#1a140d',
-            border: '1px solid #4a3826',
-            color: '#c5a059',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-accent)',
+            color: 'var(--text-secondary)',
             borderRadius: '999px',
             padding: '5px 14px',
             fontSize: '0.75rem',
             cursor: 'pointer'
           }}
-          className="hover:border-[#d4af37]"
+          className="hover:border-[var(--gold-primary)]"
         >
-          🌿 +35% Urban Forest Canopy
+          +35% Urban Forest Canopy
         </button>
         <button
           onClick={() => applyPreset('decarb')}
           style={{
-            background: '#1a140d',
-            border: '1px solid #4a3826',
-            color: '#c5a059',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-accent)',
+            color: 'var(--text-secondary)',
             borderRadius: '999px',
             padding: '5px 14px',
             fontSize: '0.75rem',
             cursor: 'pointer'
           }}
-          className="hover:border-[#d4af37]"
+          className="hover:border-[var(--gold-primary)]"
         >
-          ⚡ Industrial Decarbonization
+          Industrial Decarbonization
         </button>
         <button
           onClick={() => applyPreset('riparian')}
           style={{
-            background: '#1a140d',
-            border: '1px solid #4a3826',
-            color: '#c5a059',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-accent)',
+            color: 'var(--text-secondary)',
             borderRadius: '999px',
             padding: '5px 14px',
             fontSize: '0.75rem',
             cursor: 'pointer'
           }}
-          className="hover:border-[#d4af37]"
+          className="hover:border-[var(--gold-primary)]"
         >
-          🌊 Riparian Wetland Corridor
+          Riparian Wetland Corridor
         </button>
         <button
           onClick={() => applyPreset('sprawl')}
           style={{
-            background: '#1a140d',
-            border: '1px solid #4a3826',
-            color: '#c5a059',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-accent)',
+            color: 'var(--text-secondary)',
             borderRadius: '999px',
             padding: '5px 14px',
             fontSize: '0.75rem',
@@ -215,7 +216,7 @@ export const ScenarioLabPage: React.FC = () => {
           }}
           className="hover:border-[#e74c3c]"
         >
-          🏭 Unregulated Industrial Sprawl
+          High-Density Industrial Zone
         </button>
       </div>
 

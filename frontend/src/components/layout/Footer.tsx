@@ -3,24 +3,16 @@ import { NavLink } from 'react-router-dom';
 import { Copy, Check, ShieldCheck, Mail, ArrowUp } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.origin);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <footer style={{
-      background: '#090806',
-      borderTop: '1px solid #231b14',
+      background: 'var(--bg-secondary)',
+      borderTop: '1px solid var(--border-color)',
       padding: '3rem 3rem 2rem 3rem',
-      color: '#8b7a66',
+      color: 'var(--text-muted)',
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     }}>
       <div style={{
@@ -39,36 +31,16 @@ export const Footer: React.FC = () => {
             <span style={{
               fontFamily: "'Cinzel', Georgia, serif",
               fontSize: '1.2rem',
-              color: '#f4ede2',
+              color: 'var(--text-primary)',
               letterSpacing: '0.15em',
               fontWeight: 700
             }}>
               PRITHVI
             </span>
           </div>
-          <p style={{ fontSize: '0.82rem', lineHeight: 1.6, maxWidth: '380px', color: '#7a6a57' }}>
-            Ancient Indian earth aesthetics × cinematic environmental storytelling. Computational intelligence for urban heat and climate vulnerability.
+          <p style={{ fontSize: '0.84rem', lineHeight: 1.6, maxWidth: '420px', color: 'var(--text-muted)' }}>
+            Earth-centered planetary intelligence analyzing urban microclimates, thermal exposure, and environmental resilience.
           </p>
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '8px' }}>
-            <button
-              onClick={handleCopyLink}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: '#16110a',
-                border: '1px solid #33261a',
-                color: '#c5a059',
-                borderRadius: '4px',
-                padding: '6px 12px',
-                fontSize: '0.72rem',
-                cursor: 'pointer'
-              }}
-            >
-              {copied ? <Check size={12} color="#58d68d" /> : <Copy size={12} />}
-              <span>{copied ? 'Link Copied!' : 'Copy Atlas URL'}</span>
-            </button>
-          </div>
         </div>
 
         {/* Navigation Links */}

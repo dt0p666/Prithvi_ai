@@ -26,11 +26,12 @@ export const AboutPage: React.FC = () => {
   return (
     <div style={{
       minHeight: 'calc(100vh - 72px)',
-      backgroundColor: '#0c0a07',
+      backgroundColor: 'var(--bg-primary)',
       padding: '3rem 4rem',
-      color: '#e2d7c5',
+      color: 'var(--text-primary)',
       maxWidth: '1100px',
-      margin: '0 auto'
+      margin: '0 auto',
+      transition: 'background-color 0.25s ease'
     }}>
       {/* Header */}
       <div style={{ borderBottom: '1px solid #281e14', paddingBottom: '2rem', marginBottom: '2.5rem' }}>

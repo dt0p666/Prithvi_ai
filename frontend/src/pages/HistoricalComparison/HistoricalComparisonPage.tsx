@@ -80,9 +80,10 @@ export const HistoricalComparisonPage: React.FC = () => {
   return (
     <div style={{
       minHeight: 'calc(100vh - 72px)',
-      backgroundColor: '#0c0a07',
+      backgroundColor: 'var(--bg-primary)',
       padding: '2.5rem 3rem',
-      color: '#e2d7c5'
+      color: 'var(--text-primary)',
+      transition: 'background-color 0.25s ease'
     }}>
       {/* Title */}
       <div style={{ marginBottom: '2rem' }}>

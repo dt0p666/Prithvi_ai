@@ -12,8 +12,15 @@ import { AboutPage } from './pages/About/AboutPage';
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isAtmospheric, setIsAtmospheric] = useState(true);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    return localStorage.getItem('prithvi_theme') !== 'light';
+  });
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('prithvi_theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,8 +37,8 @@ export default function App() {
     <Router>
       <div style={{
         minHeight: '100vh',
-        backgroundColor: isAtmospheric ? '#0c0a07' : '#14120e',
-        color: '#e2d7c5',
+        backgroundColor: 'var(--bg-primary)',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative'
@@ -55,7 +62,7 @@ export default function App() {
             position: 'absolute',
             top: '-100px',
             left: '16px',
-            background: '#d4af37',
+            background: 'var(--gold-primary)',
             color: '#1a1208',
             padding: '8px 16px',
             borderRadius: '4px',
@@ -72,8 +79,8 @@ export default function App() {
         {/* Global Navigation */}
         <Navbar
           onOpenSearch={() => setSearchOpen(true)}
-          isAtmospheric={isAtmospheric}
-          onToggleTheme={() => setIsAtmospheric(!isAtmospheric)}
+          isDark={isDark}
+          onToggleTheme={() => setIsDark(!isDark)}
         />
 
         {/* Main Routed Page Content */}

@@ -4,11 +4,11 @@ import { Search, Sun, Moon, Menu, X, Globe, Sparkles } from 'lucide-react';
 
 interface NavbarProps {
   onOpenSearch: () => void;
-  isAtmospheric: boolean;
+  isDark: boolean;
   onToggleTheme: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onToggleTheme }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isDark, onToggleTheme }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -23,14 +23,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      background: 'rgba(12, 10, 7, 0.94)',
+      background: 'var(--bg-secondary)',
       backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid #231b14',
+      borderBottom: '1px solid var(--border-color)',
       padding: '0.85rem 2.5rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.25s ease'
     }}>
       {/* Brand Identity */}
       <NavLink
@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
         <img
           src="/prithvi-emblem.svg"
           alt="PRITHVI Emblem"
-          style={{ width: '40px', height: '40px', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.7))' }}
+          style={{ width: '40px', height: '40px', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}
         />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{
@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
             fontFamily: "'Cinzel', Georgia, serif",
             fontWeight: 700,
             letterSpacing: '0.22em',
-            color: '#f4ede2',
+            color: 'var(--text-primary)',
             background: 'linear-gradient(135deg, #f7e7b4 0%, #d4af37 50%, #aa771c 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -63,12 +63,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
         </div>
       </NavLink>
 
-      {/* Center Tagline (Figma: URBAN HEAT & CLIMATE INTELLIGENCE) */}
+      {/* Center Tagline */}
       <div style={{
         display: 'none',
         fontSize: '0.68rem',
         letterSpacing: '0.28em',
-        color: '#9e855c',
+        color: 'var(--text-secondary)',
         textTransform: 'uppercase',
         fontWeight: 500,
       }} className="md:block">
@@ -88,12 +88,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
                 fontFamily: "'Cinzel', Georgia, serif",
                 letterSpacing: '0.18em',
                 textDecoration: 'none',
-                color: isActive ? '#f4ede2' : '#9e855c',
-                borderBottom: isActive ? '1px solid #d4af37' : '1px solid transparent',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                borderBottom: isActive ? '1px solid var(--gold-primary)' : '1px solid transparent',
                 paddingBottom: '4px',
                 transition: 'all 0.2s ease',
               })}
-              className="hover:text-[#f4ede2]"
+              className="hover:text-[var(--text-primary)]"
             >
               {link.name}
             </NavLink>
@@ -107,9 +107,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
             onClick={onOpenSearch}
             title="Search dataset and documentation (Ctrl+K)"
             style={{
-              background: 'rgba(28, 22, 16, 0.7)',
-              border: '1px solid #3d2d1e',
-              color: '#c5a059',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-accent)',
+              color: 'var(--text-secondary)',
               borderRadius: '6px',
               padding: '6px 10px',
               cursor: 'pointer',
@@ -119,30 +119,31 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
               fontSize: '0.72rem',
               letterSpacing: '0.08em',
             }}
-            className="hover:border-[#c5a059] transition-colors"
           >
             <Search size={14} />
             <span className="hidden sm:inline">SEARCH</span>
           </button>
 
-          {/* Theme / Mood toggle */}
+          {/* Theme Mode Toggle (Dark / Light) */}
           <button
             onClick={onToggleTheme}
-            title={isAtmospheric ? 'Switch to High Contrast Mode' : 'Switch to Atmospheric Earth Mode'}
+            title={isDark ? 'Switch to Light Sandstone Mode' : 'Switch to Dark Earth Mode'}
             style={{
-              background: 'rgba(28, 22, 16, 0.7)',
-              border: '1px solid #3d2d1e',
-              color: '#c5a059',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-accent)',
+              color: 'var(--text-secondary)',
               borderRadius: '6px',
-              padding: '6px',
+              padding: '6px 10px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 600,
             }}
-            className="hover:border-[#c5a059] transition-colors"
           >
-            {isAtmospheric ? <Sparkles size={14} /> : <Moon size={14} />}
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            <span className="hidden sm:inline">{isDark ? 'LIGHT' : 'DARK'}</span>
           </button>
 
           {/* Mobile hamburger */}
@@ -151,7 +152,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#c5a059',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -170,8 +171,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
           top: '100%',
           left: 0,
           right: 0,
-          background: '#120e0a',
-          borderBottom: '1px solid #36281b',
+          background: 'var(--bg-secondary)',
+          borderBottom: '1px solid var(--border-color)',
           padding: '1.25rem 2rem',
           display: 'flex',
           flexDirection: 'column',
@@ -187,9 +188,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isAtmospheric, onT
                 fontSize: '0.85rem',
                 letterSpacing: '0.15em',
                 textDecoration: 'none',
-                color: isActive ? '#f4ede2' : '#9e855c',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
                 padding: '6px 0',
-                borderBottom: '1px solid #1e1710'
+                borderBottom: '1px solid var(--border-color)'
               })}
             >
               {link.name}

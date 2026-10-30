@@ -218,25 +218,6 @@ export const HomePage: React.FC = () => {
         </div>
 
       </div>
-
-      {/* Bottom Sub-Bar */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: '1rem',
-        fontSize: '0.72rem',
-        color: '#6e5e4c',
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif' letterSpacing: '0.08em'"
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Compass size={13} color="#9e855c" />
-          <span>ISOMETRIC TERRAIN SIMULATION · MODEL TARGET: TEMPERATURE (°C)</span>
-        </div>
-        <div>
-          <span>PROVENANCE: VERIFIED URBAN HEAT ISLAND BENCHMARK</span>
-        </div>
-      </div>
     </div>
   );
 };
