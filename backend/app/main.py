@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 from app.core.config import settings
-from app.api.routes import health, dataset
+from app.api.routes import health, dataset, models, scenarios
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -20,6 +20,8 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(dataset.router, prefix="/api", tags=["dataset"])
+app.include_router(models.router, prefix="/api", tags=["models"])
+app.include_router(scenarios.router, prefix="/api", tags=["scenarios"])
 
 class ContactRequest(BaseModel):
     name: str

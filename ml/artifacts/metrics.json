@@ -1,0 +1,121 @@
+{
+  "target": "Temperature (\u00b0C)",
+  "target_units": "\u00b0C",
+  "dataset_rows": 500,
+  "train_samples": 400,
+  "test_samples": 100,
+  "features": {
+    "categorical": [
+      "Land Cover"
+    ],
+    "numeric": [
+      "Elevation (m)",
+      "Population Density (people/km\u00b2)",
+      "Energy Consumption (kWh)",
+      "Air Quality Index (AQI)",
+      "Urban Greenness Ratio (%)",
+      "Wind Speed (km/h)",
+      "Humidity (%)",
+      "Annual Rainfall (mm)",
+      "GDP per Capita (USD)"
+    ]
+  },
+  "all_transformed_features": [
+    "Elevation (m)",
+    "Population Density (people/km\u00b2)",
+    "Energy Consumption (kWh)",
+    "Air Quality Index (AQI)",
+    "Urban Greenness Ratio (%)",
+    "Wind Speed (km/h)",
+    "Humidity (%)",
+    "Annual Rainfall (mm)",
+    "GDP per Capita (USD)",
+    "Land Cover_Green Space",
+    "Land Cover_Industrial",
+    "Land Cover_Urban",
+    "Land Cover_Water"
+  ],
+  "models_benchmarked": {
+    "DummyBaseline": {
+      "model_name": "DummyBaseline",
+      "mae": 6.1507,
+      "rmse": 7.0233,
+      "r2": -0.0278,
+      "best_model": true
+    },
+    "RidgeRegression": {
+      "model_name": "RidgeRegression",
+      "mae": 6.1676,
+      "rmse": 7.2507,
+      "r2": -0.0954
+    },
+    "RandomForest": {
+      "model_name": "RandomForest",
+      "mae": 6.0323,
+      "rmse": 7.1177,
+      "r2": -0.0556
+    },
+    "LightGBM": {
+      "model_name": "LightGBM",
+      "mae": 6.243,
+      "rmse": 7.5374,
+      "r2": -0.1838
+    }
+  },
+  "best_model": "DummyBaseline",
+  "feature_importances": [
+    {
+      "feature": "Humidity (%)",
+      "importance": 0.1307
+    },
+    {
+      "feature": "Wind Speed (km/h)",
+      "importance": 0.1237
+    },
+    {
+      "feature": "Energy Consumption (kWh)",
+      "importance": 0.1117
+    },
+    {
+      "feature": "Annual Rainfall (mm)",
+      "importance": 0.1062
+    },
+    {
+      "feature": "Elevation (m)",
+      "importance": 0.1055
+    },
+    {
+      "feature": "GDP per Capita (USD)",
+      "importance": 0.0993
+    },
+    {
+      "feature": "Air Quality Index (AQI)",
+      "importance": 0.096
+    },
+    {
+      "feature": "Urban Greenness Ratio (%)",
+      "importance": 0.0921
+    },
+    {
+      "feature": "Population Density (people/km\u00b2)",
+      "importance": 0.0876
+    },
+    {
+      "feature": "Land Cover_Urban",
+      "importance": 0.0237
+    },
+    {
+      "feature": "Land Cover_Green Space",
+      "importance": 0.0092
+    },
+    {
+      "feature": "Land Cover_Water",
+      "importance": 0.0087
+    },
+    {
+      "feature": "Land Cover_Industrial",
+      "importance": 0.0056
+    }
+  ],
+  "timestamp": "2026-10-30T22:08:00Z"
+}
