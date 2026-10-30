@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { CityRecord } from '../../types';
-import { Search, Compass, Trees, Wind, Droplets, Zap, Activity, Info, Map as MapIcon, List, Eye } from 'lucide-react';
+import { Search, Compass, Trees, Wind, Droplets, Zap, Activity, Info, Map as MapIcon, Globe, Eye } from 'lucide-react';
 import { InteractiveClimateMap } from '../../components/maps/InteractiveClimateMap';
+import { GeoMap } from '../../components/maps/GeoMap';
 
 // Initial fallback to ensure zero blank states if network delay occurs
 const INITIAL_DEMO_CITIES: CityRecord[] = [
@@ -23,6 +24,7 @@ export const ClimateExplorerPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'temp_desc' | 'temp_asc' | 'green_desc'>('temp_desc');
   const [activeMetric, setActiveMetric] = useState<'temp' | 'green' | 'aqi' | 'energy'>('temp');
   const [viewMode, setViewMode] = useState<'map' | 'split'>('split');
+  const [mapEngine, setMapEngine] = useState<'geo' | 'scatter'>('geo');
   const [showRegistryInfo, setShowRegistryInfo] = useState(false);
 
   useEffect(() => {
@@ -233,58 +235,72 @@ export const ClimateExplorerPage: React.FC = () => {
           ))}
         </div>
 
-        {/* View Mode Toggle (Map vs Split) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-input)', padding: '2px', borderRadius: '4px' }}>
-          <button
-            onClick={() => setViewMode('split')}
-            style={{
-              background: viewMode === 'split' ? 'var(--bg-secondary)' : 'transparent',
-              color: viewMode === 'split' ? 'var(--text-primary)' : 'var(--text-muted)',
-              border: 'none',
-              borderRadius: '3px',
-              padding: '4px 8px',
-              fontSize: '11px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <MapIcon size={12} />
-            <span>Map &amp; Registry</span>
-          </button>
+        {/* View Mode & Map Engine Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-input)', padding: '2px', borderRadius: '4px' }}>
+            <button
+              onClick={() => setMapEngine('geo')}
+              style={{
+                background: mapEngine === 'geo' ? 'var(--gold-primary)' : 'transparent',
+                color: mapEngine === 'geo' ? '#1a1208' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: '3px',
+                padding: '4px 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <Globe size={12} />
+              <span>3D Geographic Map</span>
+            </button>
 
-          <button
-            onClick={() => setViewMode('map')}
-            style={{
-              background: viewMode === 'map' ? 'var(--bg-secondary)' : 'transparent',
-              color: viewMode === 'map' ? 'var(--text-primary)' : 'var(--text-muted)',
-              border: 'none',
-              borderRadius: '3px',
-              padding: '4px 8px',
-              fontSize: '11px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <Eye size={12} />
-            <span>Map Focus</span>
-          </button>
+            <button
+              onClick={() => setMapEngine('scatter')}
+              style={{
+                background: mapEngine === 'scatter' ? 'var(--gold-primary)' : 'transparent',
+                color: mapEngine === 'scatter' ? '#1a1208' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: '3px',
+                padding: '4px 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <MapIcon size={12} />
+              <span>2D Scatter Map</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* 1. INTERACTIVE CLIMATE HEAT MAP */}
+      {/* 1. INTERACTIVE CLIMATE MAP (3D Geo Map or 2D Scatter Map) */}
       <div style={{ marginBottom: '2rem' }}>
-        <InteractiveClimateMap
-          cities={filtered}
-          selectedCity={selectedCity}
-          onSelectCity={(city) => setSelectedCity(city)}
-          activeMetric={activeMetric}
-          onChangeMetric={(m) => setActiveMetric(m)}
-          selectedLandCover={selectedLandCover}
-        />
+        {mapEngine === 'geo' ? (
+          <GeoMap
+            cities={filtered}
+            selectedCity={selectedCity}
+            onSelectCity={(city) => setSelectedCity(city)}
+            activeMetric={activeMetric}
+            selectedLandCover={selectedLandCover}
+          />
+        ) : (
+          <InteractiveClimateMap
+            cities={filtered}
+            selectedCity={selectedCity}
+            onSelectCity={(city) => setSelectedCity(city)}
+            activeMetric={activeMetric}
+            onChangeMetric={(m) => setActiveMetric(m)}
+            selectedLandCover={selectedLandCover}
+          />
+        )}
       </div>
 
       {/* 2. SPLIT VIEW: REGISTRY LIST & SELECTED TELEMETRY CARD */}
