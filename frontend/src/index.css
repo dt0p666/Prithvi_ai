@@ -80,6 +80,15 @@ body {
   background: #e6ddd2 !important;
 }
 
+/* Custom Keyless Prithvi Map Tile Theme Filters */
+.prithvi-dark-tiles {
+  filter: brightness(0.65) invert(1) contrast(1.5) hue-rotate(205deg) saturate(0.25) sepia(0.15) !important;
+}
+
+.prithvi-earth-tiles {
+  filter: contrast(1.1) saturate(0.85) sepia(0.12) !important;
+}
+
 /* Print Stylesheet */
 @media print {
   body {

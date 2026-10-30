@@ -25,7 +25,7 @@ export const GeoMap: React.FC<GeoMapProps> = ({
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
   const [is3D, setIs3D] = useState(false);
-  const [mapType, setMapType] = useState<'voyager' | 'dark' | 'osm'>('voyager');
+  const [mapType, setMapType] = useState<'dark' | 'osm' | 'topo'>('dark');
 
   // Initialize Leaflet Map centered on India
   useEffect(() => {
@@ -50,7 +50,7 @@ export const GeoMap: React.FC<GeoMapProps> = ({
     };
   }, []);
 
-  // Update 100% legal, keyless, open tile layer
+  // Update 100% legal, keyless, open tile layer (Zero API key, zero watermarks)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -62,20 +62,26 @@ export const GeoMap: React.FC<GeoMapProps> = ({
       }
     });
 
-    let tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-    let attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
+    let tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+    let attribution = '&copy; OpenStreetMap contributors';
+    let className = 'prithvi-dark-tiles';
+    let subdomains: string | string[] = 'abc';
 
-    if (mapType === 'dark') {
-      tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-    } else if (mapType === 'osm') {
-      tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      attribution = '&copy; OpenStreetMap contributors';
+    if (mapType === 'osm') {
+      tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+      className = 'prithvi-earth-tiles';
+    } else if (mapType === 'topo') {
+      tileUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+      attribution = '&copy; OpenTopoMap &copy; OpenStreetMap contributors';
+      className = '';
+      subdomains = ['a', 'b', 'c'];
     }
 
     L.tileLayer(tileUrl, {
-      maxZoom: 18,
-      subdomains: 'abcd',
-      attribution: attribution
+      maxZoom: 17,
+      subdomains: subdomains,
+      attribution: attribution,
+      className: className
     }).addTo(map);
   }, [mapType]);
 
@@ -221,10 +227,10 @@ export const GeoMap: React.FC<GeoMapProps> = ({
           <span>{is3D ? '3D ACTIVE' : '3D PERSPECTIVE'}</span>
         </button>
 
-        {/* Map Tile Theme Switcher (CARTO Voyager / Dark Matter / OSM) */}
+        {/* Map Tile Theme Switcher (Keyless OpenStreetMap & OpenTopoMap) */}
         <button
           onClick={() => {
-            const nextType = mapType === 'voyager' ? 'dark' : mapType === 'dark' ? 'osm' : 'voyager';
+            const nextType = mapType === 'dark' ? 'osm' : mapType === 'osm' ? 'topo' : 'dark';
             setMapType(nextType);
           }}
           title="Switch Map Tiles (Keyless, Free & Legal)"
@@ -246,7 +252,7 @@ export const GeoMap: React.FC<GeoMapProps> = ({
         >
           <Layers size={13} />
           <span>
-            {mapType === 'voyager' ? 'VOYAGER' : mapType === 'dark' ? 'DARK ATLAS' : 'STREETS'}
+            {mapType === 'dark' ? 'DARK ATLAS' : mapType === 'osm' ? 'STREETS' : 'TOPOGRAPHY'}
           </span>
         </button>
 

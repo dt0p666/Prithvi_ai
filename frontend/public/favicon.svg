@@ -1,59 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
   <defs>
-    <!-- Antique Gold Gradient -->
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F3E5AB" />
-      <stop offset="25%" stop-color="#D4AF37" />
-      <stop offset="50%" stop-color="#AA771C" />
-      <stop offset="75%" stop-color="#E6C875" />
-      <stop offset="100%" stop-color="#805A10" />
+    <linearGradient id="prithviGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff3cc" />
+      <stop offset="35%" stop-color="#d4af37" />
+      <stop offset="70%" stop-color="#aa771c" />
+      <stop offset="100%" stop-color="#664610" />
     </linearGradient>
 
-    <!-- Deep Bronze Rim Gradient -->
-    <radialGradient id="bronzeRim" cx="50%" cy="50%" r="50%">
-      <stop offset="75%" stop-color="#1E1710" />
-      <stop offset="92%" stop-color="#3A2D1F" />
-      <stop offset="100%" stop-color="#D4AF37" />
-    </radialGradient>
+    <linearGradient id="prithviTerracotta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e27a5b" />
+      <stop offset="60%" stop-color="#b85233" />
+      <stop offset="100%" stop-color="#6e2b17" />
+    </linearGradient>
 
-    <!-- Inner Earth Texture Glow -->
-    <radialGradient id="innerGlow" cx="45%" cy="40%" r="60%">
-      <stop offset="0%" stop-color="#38291A" />
-      <stop offset="60%" stop-color="#1A130C" />
-      <stop offset="100%" stop-color="#0E0A06" />
+    <linearGradient id="prithviEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#58d68d" />
+      <stop offset="70%" stop-color="#1e6b37" />
+      <stop offset="100%" stop-color="#0b3117" />
+    </linearGradient>
+
+    <radialGradient id="earthDisc" cx="42%" cy="38%" r="62%">
+      <stop offset="0%" stop-color="#2e2217" />
+      <stop offset="55%" stop-color="#18110b" />
+      <stop offset="100%" stop-color="#0b0805" />
     </radialGradient>
   </defs>
 
-  <!-- Outer Ring with Antique Gold Stroke -->
-  <circle cx="50" cy="50" r="47" fill="url(#innerGlow)" stroke="url(#goldGrad)" stroke-width="1.8" />
-  
-  <!-- Subtle Inner Concentric Ring -->
-  <circle cx="50" cy="50" r="42" fill="none" stroke="#D4AF37" stroke-width="0.6" stroke-opacity="0.4" stroke-dasharray="2 3" />
-  
-  <!-- 4 Cardinal Star Points (Astrological / Geographic Compass) -->
-  <circle cx="50" cy="5.5" r="1.2" fill="#E6C875" />
-  <circle cx="50" cy="94.5" r="1.2" fill="#E6C875" />
-  <circle cx="5.5" cy="50" r="1.2" fill="#E6C875" />
-  <circle cx="94.5" cy="50" r="1.2" fill="#E6C875" />
+  <!-- Outer Planetary Boundary Ring -->
+  <circle cx="50" cy="50" r="47" fill="url(#earthDisc)" stroke="url(#prithviGold)" stroke-width="1.8" />
 
-  <!-- Stylized Serif 'P' with Earth & Foliage Motif -->
-  <path d="M 36 26
-           L 54 26
-           C 66 26, 73 32, 73 42
-           C 73 52, 65 58, 54 58
-           L 44 58
-           L 44 74
-           L 36 74
-           Z
-           M 44 34
-           L 44 50
-           L 53 50
-           C 60 50, 64 47, 64 42
-           C 64 37, 60 34, 53 34
-           Z" 
-        fill="url(#goldGrad)" 
-        filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.6))" />
+  <!-- 8 Cardinal Points (Ashta-Dikpalas compass markings) -->
+  <circle cx="94" cy="50" r="1.6" fill="#f7e7b4" />
+  <circle cx="81.1" cy="81.1" r="1.0" fill="#aa771c" />
+  <circle cx="50" cy="94" r="1.6" fill="#f7e7b4" />
+  <circle cx="18.9" cy="81.1" r="1.0" fill="#aa771c" />
+  <circle cx="6" cy="50" r="1.6" fill="#f7e7b4" />
+  <circle cx="18.9" cy="18.9" r="1.0" fill="#aa771c" />
+  <circle cx="50" cy="6" r="1.6" fill="#f7e7b4" />
+  <circle cx="81.1" cy="18.9" r="1.0" fill="#aa771c" />
 
-  <!-- Subtle Equator / Latitude Arc across the P -->
-  <path d="M 28 50 Q 50 56 72 50" fill="none" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.4" />
+  <!-- Gyroscopic Coordinate Rings -->
+  <ellipse cx="50" cy="50" rx="41" ry="18" fill="none" stroke="url(#prithviGold)" stroke-width="0.9" stroke-dasharray="2.5 3" opacity="0.75" transform="rotate(25 50 50)" />
+  <ellipse cx="50" cy="50" rx="18" ry="41" fill="none" stroke="url(#prithviTerracotta)" stroke-width="0.9" stroke-dasharray="3 3.5" opacity="0.8" transform="rotate(-30 50 50)" />
+  <circle cx="50" cy="50" r="28" fill="none" stroke="url(#prithviEmerald)" stroke-width="1.2" opacity="0.7" />
+
+  <!-- Central Sanskrit 'पृ' & Serif 'P' Motif -->
+  <path d="M 37 28 L 52 28 C 63 28, 69 34, 69 42 C 69 50, 62 55, 52 55 L 45 55 L 45 68 L 37 68 Z M 45 35 L 45 48 L 51 48 C 57 48, 61 46, 61 41.5 C 61 37, 57 35, 51 35 Z" fill="url(#prithviGold)" />
+  <path d="M 45 68 C 45 74, 51 77, 57 75 C 60 74, 62 71, 62 69 C 62 67, 60 67, 59 68 C 58 69, 56 70, 54 70 C 50 70, 48 67, 48 64 Z" fill="url(#prithviEmerald)" />
+  <circle cx="50" cy="41.5" r="2.2" fill="#fff3cc" />
 </svg>

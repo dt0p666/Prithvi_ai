@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Search, Sun, Moon, Menu, X, Globe, Sparkles } from 'lucide-react';
+import { PrithviLogo } from '../common/PrithviLogo';
 
 interface NavbarProps {
   onOpenSearch: () => void;
@@ -32,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isDark, onToggleTh
       justifyContent: 'space-between',
       transition: 'all 0.25s ease'
     }}>
-      {/* Brand Identity */}
+      {/* Brand Identity with Interactive Sacred Logo */}
       <NavLink
         to="/"
         style={{
@@ -42,25 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch, isDark, onToggleTh
           textDecoration: 'none'
         }}
       >
-        <img
-          src="/prithvi-emblem.svg"
-          alt="PRITHVI Emblem"
-          style={{ width: '40px', height: '40px', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}
-        />
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{
-            fontSize: '1.25rem',
-            fontFamily: "'Cinzel', Georgia, serif",
-            fontWeight: 700,
-            letterSpacing: '0.22em',
-            color: 'var(--text-primary)',
-            background: 'linear-gradient(135deg, #f7e7b4 0%, #d4af37 50%, #aa771c 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>
-            PRITHVI
-          </span>
-        </div>
+        <PrithviLogo size="sm" showLabel={true} interactive={true} />
       </NavLink>
 
       {/* Center Tagline */}

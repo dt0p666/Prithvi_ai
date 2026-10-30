@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Copy, Check, ShieldCheck, Mail, ArrowUp } from 'lucide-react';
+import { PrithviLogo } from '../common/PrithviLogo';
 
 export const Footer: React.FC = () => {
   const scrollToTop = () => {
@@ -26,17 +27,8 @@ export const Footer: React.FC = () => {
 
         {/* Brand & Manifesto */}
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-            <img src="/prithvi-emblem.svg" alt="PRITHVI" style={{ width: '32px', height: '32px' }} />
-            <span style={{
-              fontFamily: "'Cinzel', Georgia, serif",
-              fontSize: '1.2rem',
-              color: 'var(--text-primary)',
-              letterSpacing: '0.15em',
-              fontWeight: 700
-            }}>
-              PRITHVI
-            </span>
+          <div style={{ marginBottom: '1rem' }}>
+            <PrithviLogo size="sm" showLabel={true} interactive={true} />
           </div>
           <p style={{ fontSize: '0.84rem', lineHeight: 1.6, maxWidth: '420px', color: 'var(--text-muted)' }}>
             Earth-centered planetary intelligence analyzing urban microclimates, thermal exposure, and environmental resilience.
